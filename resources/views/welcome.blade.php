@@ -8,40 +8,59 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
-        <!-- <link href="css/local-styling.css" rel="stylesheet"> -->
         <link href="css/app.css" rel="stylesheet">
     </head>
     <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
+        <div id="app">
+            <router-component inline-template>
+                <div>
+                    <div style="width: 100%; background: powderblue; height: 60px; color: white;">
+                        <!-- @if (Route::has('login'))   
+                        <div class="top-right links">
+                            @auth
+                                <a href="{{ url('/home') }}">Home</a>
+                            @else
+                                <a href="{{ route('login') }}">Login</a>
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}">Register</a>
-                        @endif
-                    @endauth
-                </div>
-            @endif
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}">Register</a>
+                                @endif
+                            @endauth
+                        </div>
+                        @endif    -->
+                        <div class="dropdown" style="margin-left: 2%; margin-top: 0.6%;">
+                            <a style="font-size: x-large;">Sales</a>
+                            <div class="dropdown-content">
+                                <a href="#">Sale</a>
+                                <a href="#">Return</a>
+                            </div>
+                        </div>
+                        <div class="dropdown" style="margin-left: 2%; margin-top: 0.6%;">
+                            <a style="font-size: x-large;">Inventory</a>
+                            <div class="dropdown-content">
+                                <a href="#">Stock List</a>
+                                <a href="#">Update Stock</a>
+                            </div>
+                        </div>          
+                    </div>
 
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
+                    <div class="content" style="margin-top: 1%">
+                        <div class="m-b-md" style="font-size: 65px;">
+                            Sale
+                        </div>
+                        <div class="m-b-md" style="font-size: 65px;">
+                            Return
+                        </div>
+                        <div class="m-b-md" style="font-size: 65px;">
+                            Stock List
+                        </div>
+                        <div class="m-b-md" style="font-size: 65px;">
+                            Update Stock
+                        </div>
+                    </div>
                 </div>
-
-                <div class="links">
-                    <a href="https://laravel.com/docs">Docs</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://blog.laravel.com">Blog</a>
-                    <a href="https://nova.laravel.com">Nova</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
-            </div>
+            </router-component>
         </div>
+        <script src="js/app.js"></script>
     </body>
 </html>

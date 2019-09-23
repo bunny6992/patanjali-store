@@ -31,31 +31,37 @@
                         <div class="dropdown" style="margin-left: 2%; margin-top: 0.6%;">
                             <a style="font-size: x-large;">Sales</a>
                             <div class="dropdown-content">
-                                <a href="#">Sale</a>
-                                <a href="#">Return</a>
+                                <a href="#" @click="route = 'sale'">Sale</a>
+                                <a href="#" @click="route = 'return'">Return</a>
                             </div>
                         </div>
                         <div class="dropdown" style="margin-left: 2%; margin-top: 0.6%;">
                             <a style="font-size: x-large;">Inventory</a>
                             <div class="dropdown-content">
-                                <a href="#">Stock List</a>
-                                <a href="#">Update Stock</a>
+                                <a href="#" @click="route = 'stockList'">Stock List</a>
+                                <a href="#" @click="route = 'updateStock'">Update Stock</a>
                             </div>
                         </div>          
                     </div>
 
                     <div class="content" style="margin-top: 1%">
-                        <div class="m-b-md" style="font-size: 65px;">
+                        <div class="m-b-md" style="font-size: 65px;" v-if="route === 'sale'">
                             Sale
                         </div>
-                        <div class="m-b-md" style="font-size: 65px;">
+                        <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'return'">
                             Return
                         </div>
-                        <div class="m-b-md" style="font-size: 65px;">
+                        <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'stockList'">
                             Stock List
                         </div>
-                        <div class="m-b-md" style="font-size: 65px;">
+                        <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'updateStock'">
                             Update Stock
+                        </div> 
+                        <div class="m-b-md" style="font-size: 65px;" v-else>
+                            Hey Dude!
+                            What up?
+                        <div>
+                            
                         </div>
                     </div>
                 </div>

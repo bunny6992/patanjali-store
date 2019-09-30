@@ -54,14 +54,30 @@
                         <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'stockList'">
                             Stock List
                         </div>
-                        <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'updateStock'">
-                            Update Stock
+                        <!-- Import New Items -->
+                        <div class="m-b-md" style="font-size: 16px;" v-else-if="route === 'updateStock'">
+                            
+                            <div class="container">
+                                <div class="card bg-light mt-3">
+                                    <div class="card-header">
+                                        Laravel 5.7 Import Export Excel to database Example - ItSolutionStuff.com
+                                    </div>
+                                    <div class="card-body">
+                                        <form action="{{ route('import') }}" method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <input type="file" name="file" class="form-control">
+                                            <br>
+                                            <button class="btn btn-success">Import User Data</button>
+                                            <a class="btn btn-warning" href="{{ route('export') }}">Export User Data</a>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div> 
                         <div class="m-b-md" style="font-size: 65px;" v-else>
                             Hey Dude!
                             What up?
-                        <div>
-                            
                         </div>
                     </div>
                 </div>

@@ -21,4 +21,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('export', 'ImportExcelController@export')->name('export');
 Route::get('importExportView', 'ImportExcelController@importExportView');
-Route::post('import', 'ImportExcelController@import')->name('import');
+Route::post('bulkAddNewStock', 'ImportExcelController@bulkAddNewStock')->name('bulkAddNewStock');
+Route::post('bulkUpdateStock', 'ImportExcelController@bulkUpdateStock')->name('bulkUpdateStock');

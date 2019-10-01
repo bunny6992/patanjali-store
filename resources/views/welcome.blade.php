@@ -40,6 +40,7 @@
                             <div class="dropdown-content">
                                 <a href="#" @click="route = 'stockList'">Stock List</a>
                                 <a href="#" @click="route = 'updateStock'">Update Stock</a>
+                                <a href="#" @click="route = 'addNewProducts'">Add New Products</a>
                             </div>
                         </div>          
                     </div>
@@ -54,21 +55,37 @@
                         <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'stockList'">
                             Stock List
                         </div>
-                        <!-- Import New Items -->
                         <div class="m-b-md" style="font-size: 16px;" v-else-if="route === 'updateStock'">
+                            <div class="container">
+                                <div class="card bg-light mt-3">
+                                    <div class="card-header">
+                                        Hey Sexy, Hope you are having a great day!
+                                    </div>
+                                    <div class="card-body">
+                                        <form  @submit.prevent="submit('bulkUpdateStock')">
+                                            @csrf
+                                            <input class="form-control" type="file" id="file" ref="file" @change="handleFileUpload()">
+                                            <br>
+                                            <button class="btn btn-success">Update Stock</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Import New Products -->
+                        <div class="m-b-md" style="font-size: 16px;" v-else-if="route === 'addNewProducts'">
                             
                             <div class="container">
                                 <div class="card bg-light mt-3">
                                     <div class="card-header">
-                                        Laravel 5.7 Import Export Excel to database Example - ItSolutionStuff.com
+                                        Hey Sexy, Hope you are having a great day!
                                     </div>
                                     <div class="card-body">
-                                        <form action="{{ route('import') }}" method="POST" enctype="multipart/form-data">
+                                        <form  @submit.prevent="submit('bulkAddNewStock')">
                                             @csrf
-                                            <input type="file" name="file" class="form-control">
+                                            <input class="form-control" type="file" id="file" ref="file" @change="handleFileUpload()">
                                             <br>
-                                            <button class="btn btn-success">Import User Data</button>
-                                            <a class="btn btn-warning" href="{{ route('export') }}">Export User Data</a>
+                                            <button class="btn btn-success">Import New Products</button>
                                         </form>
                                     </div>
                                 </div>

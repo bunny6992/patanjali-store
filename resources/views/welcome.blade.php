@@ -9,6 +9,7 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
         <link href="css/app.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="../resources/fontawesome/css/all.css">
     </head>
     <body style="overflow-x: hidden;">
         <div id="app">
@@ -50,7 +51,7 @@
                             Sale
                             <invoicer inline-template>
                                 <div style="font-size: 18px;">
-                                    <div class="row" style="height: 320px; overflow: scroll; overflow-x: hidden; width: 100%;">
+                                    <div class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
                                         <div class="col-md-12">
                                             <table class="table">
                                                 <thead class="thead-dark">
@@ -61,6 +62,7 @@
                                                         <th scope="col">Price Incl. Tax</th>
                                                         <th scope="col">Qty</th>
                                                         <th scope="col">Amount</th>
+                                                        <th scope="col">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -69,104 +71,9 @@
                                                         <td>Soyavita</td>
                                                         <td>10%</td>
                                                         <td>10</td>
-                                                        <td>2</td>
+                                                        <td><i class="fas fa-minus-circle" style="font-size: 15px; cursor: pointer;"></i>  2  <i class="fas fa-plus-circle" style="font-size: 15px; cursor: pointer;"></i></td>
                                                         <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td>2</td>
-                                                        <td>20</td>
+                                                        <td><i class="fas fa-trash" style="cursor: pointer;"></i></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -178,7 +85,11 @@
                                             Add Here
                                         </div>
                                         <div class="col-md-3">
-                                            <input type="text" name="add-item" class="form-control">
+                                            <v-select ref="test" label="name" taggable :filterable="false" :options="options" @search="onSearch">
+                                                <template slot="no-options">
+                                                    type to search GitHub repositories..
+                                                </template>
+                                            </v-select>
                                         </div>
                                     </div>
                                     <br>
@@ -186,12 +97,12 @@
                                         <table class="table">
                                             <thead class="thead-light">
                                                 <tr>
-                                                    <th scope="col">Sr. No.</th>
-                                                    <th scope="col">Product</th>
-                                                    <th scope="col">Tax</th>
-                                                    <th scope="col">Price Incl. Tax</th>
-                                                    <th scope="col">Qty</th>
-                                                    <th scope="col">Amount</th>
+                                                    <th scope="col" style="cursor: pointer;"></th>
+                                                    <th scope="col"><span style="cursor: pointer;">All Bills</span></th>
+                                                    <th scope="col"><span style="cursor: pointer;">Recall Bills</span></th>
+                                                    <th scope="col"><span style="cursor: pointer;">Minimise</span></th>
+                                                    <th scope="col"><span style="cursor: pointer;">Save And Close</span></th>
+                                                    <th scope="col"><span style="cursor: pointer;">Save And Print</span></th>
                                                 </tr>
                                             </thead>
                                         </table>                             

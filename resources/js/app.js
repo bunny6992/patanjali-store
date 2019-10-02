@@ -7,6 +7,11 @@
 require('./bootstrap');
 
 window.Vue = require('vue');
+import vSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
+import { ModelSelect } from 'vue-search-select';
+import 'vue-search-select/dist/VueSearchSelect.css';
+window._ = require('lodash');
 
 /**
  * The following block of code may be used to automatically register your
@@ -22,6 +27,9 @@ window.Vue = require('vue');
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('router-component', require('./components/RouterComponent.vue').default);
 Vue.component('invoicer', require('./components/Invoicer.vue').default);
+Vue.component('v-select', vSelect);
+Vue.component('model-select', ModelSelect);
+
 
 
 /**

@@ -48,6 +48,60 @@
                     <div class="content" style="margin-top: 1%">
                         <div class="m-b-md" style="font-size: 65px;" v-if="route === 'sale'">
                             Sale
+                            <invoicer inline-template>
+                                <div style="font-size: 18px;">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <table class="table">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th scope="col">Sr. No.</th>
+                                                        <th scope="col">Product</th>
+                                                        <th scope="col">Tax</th>
+                                                        <th scope="col">Price Incl. Tax</th>
+                                                        <th scope="col">Qty</th>
+                                                        <th scope="col">Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            Add Here
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" name="add-item" class="form-control">
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <table class="table">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th scope="col">Sr. No.</th>
+                                                    <th scope="col">Product</th>
+                                                    <th scope="col">Tax</th>
+                                                    <th scope="col">Price Incl. Tax</th>
+                                                    <th scope="col">Qty</th>
+                                                    <th scope="col">Amount</th>
+                                                </tr>
+                                            </thead>
+                                        </table>                             
+                                    </div>
+                                </div>
+                            </invoicer>
                         </div>
                         <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'return'">
                             Return

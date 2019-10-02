@@ -21,6 +21,7 @@ window.Vue = require('vue');
 
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('router-component', require('./components/RouterComponent.vue').default);
+Vue.component('invoicer', require('./components/Invoicer.vue').default);
 
 
 /**

@@ -10,7 +10,7 @@
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
         <link href="css/app.css" rel="stylesheet">
     </head>
-    <body>
+    <body style="overflow-x: hidden;">
         <div id="app">
             <router-component inline-template>
                 <div>
@@ -28,14 +28,14 @@
                             @endauth
                         </div>
                         @endif    -->
-                        <div class="dropdown" style="margin-left: 2%; margin-top: 0.6%;">
+                        <div class="dropdown" style="margin-left: 2%; margin-top: 0.4%;">
                             <a style="font-size: x-large;">Sales</a>
                             <div class="dropdown-content">
                                 <a href="#" @click="route = 'sale'">Sale</a>
                                 <a href="#" @click="route = 'return'">Return</a>
                             </div>
                         </div>
-                        <div class="dropdown" style="margin-left: 2%; margin-top: 0.6%;">
+                        <div class="dropdown" style="margin-left: 2%;">
                             <a style="font-size: x-large;">Inventory</a>
                             <div class="dropdown-content">
                                 <a href="#" @click="route = 'stockList'">Stock List</a>
@@ -45,12 +45,12 @@
                         </div>          
                     </div>
 
-                    <div class="content" style="margin-top: 1%">
+                    <div class="content" style="margin-top: 0.7%;">
                         <div class="m-b-md" style="font-size: 65px;" v-if="route === 'sale'">
                             Sale
                             <invoicer inline-template>
                                 <div style="font-size: 18px;">
-                                    <div class="row">
+                                    <div class="row" style="height: 320px; overflow: scroll; overflow-x: hidden; width: 100%;">
                                         <div class="col-md-12">
                                             <table class="table">
                                                 <thead class="thead-dark">
@@ -64,6 +64,102 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Soyavita</td>
+                                                        <td>10%</td>
+                                                        <td>10</td>
+                                                        <td>2</td>
+                                                        <td>20</td>
+                                                    </tr>
                                                     <tr>
                                                         <th scope="row">1</th>
                                                         <td>Soyavita</td>
@@ -86,7 +182,7 @@
                                         </div>
                                     </div>
                                     <br>
-                                    <div class="row">
+                                    <div class="row" style="width: 100%;">
                                         <table class="table">
                                             <thead class="thead-light">
                                                 <tr>

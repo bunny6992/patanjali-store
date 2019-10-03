@@ -22,9 +22,20 @@ class ApiController extends Controller
     	}
 
     	$return = [];
-    	foreach ($products as $id => $product) {
-    		$returnProduct['product'] = $product;
-    		$returnProduct['batches'] = $product->batches;
+        $sortedProducts = $products->sortBy('name');
+    	foreach ($sortedProducts as $id => $product) {
+            foreach ($product->batches as $batchId => $batch) {
+                $returnProduct = [
+                    'product_id' => $product->id,
+                    'batch_id' => $batch->id,
+                    'name' => $product->name,
+                    'tax' => $product->tax,
+                    'mrp' => $batch->mrp,
+                    'qty' => $batch->qty,
+                    'avg_cost' => $batch->avg_cost
+                ];
+            }
+
     		array_push($return, $returnProduct);
     	}
 

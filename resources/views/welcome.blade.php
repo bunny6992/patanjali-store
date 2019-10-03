@@ -9,7 +9,7 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
         <link href="css/app.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="../resources/fontawesome/css/all.css">
+        <link rel="stylesheet" type="text/css" href="{{ asset('fontawesome/css/all.css') }}">
     </head>
     <body style="overflow-x: hidden;">
         <div id="app">

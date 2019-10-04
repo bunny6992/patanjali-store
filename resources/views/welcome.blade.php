@@ -58,8 +58,27 @@ input[type=number]::-webkit-outer-spin-button {
                     <div class="content" style="margin-top: 0.7%;">
                         <div class="m-b-md" style="font-size: 65px;" v-if="route === 'sale'">
                             Sale
+                            
                             <invoicer inline-template>
                                 <div style="font-size: 18px;">
+
+                                    <div class="row" style="margin-top: 0.8%; margin-bottom: 3%; margin-left: 8%;">
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-1">
+                                            Add Here
+                                        </div>
+                                        <div class="col-md-5">
+                                            <v-select autofocus @change.native="changed" ref="test" label="name" taggable :filterable="false" :options="options" @search="onSearch" @keyup.delete.native="myFunction">
+                                                <template slot="no-options">
+                                                   Type what you want or scan if you are feeling lazy..
+                                                </template>
+                                            </v-select>
+                                        </div>
+                                        <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
+                                        <!-- <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button> -->
+                                    </div>
+
                                     <div id="billing-table" class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
                                         <div class="col-md-12">
                                             <table class="table">
@@ -80,7 +99,7 @@ input[type=number]::-webkit-outer-spin-button {
                                                         <td>@{{ item.name }}</td>
                                                         <td>@{{ item.tax }}%</td>
                                                         <td>@{{ item.mrp }}</td>
-                                                        <td style="width: 10%;"><i @click="decreaseQty(item)" class="fas fa-minus-circle" style="font-size: 15px; cursor: pointer;"></i>  <input type="number" name="qty" v-model="item.qty" style="width: 36%; text-align: center; border-radius: 10%;">  <i class="fas fa-plus-circle" style="font-size: 15px; cursor: pointer;" @click="increaseQty(item)"></i></td>
+                                                        <td style="width: 10%;"><i @click="decreaseQty(item)" class="fas fa-minus-circle" style="font-size: 15px; cursor: pointer;"></i>  <input type="number" name="qty" v-model="item.qty" style="width: 45%; text-align: center; border-radius: 10%;">  <i class="fas fa-plus-circle" style="font-size: 15px; cursor: pointer;" @click="increaseQty(item)"></i></td>
                                                         <td>@{{ item.mrp * item.qty }}</td>
                                                         <td><i @click="removeItem(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
                                                     </tr>
@@ -88,35 +107,39 @@ input[type=number]::-webkit-outer-spin-button {
                                             </table>
                                         </div>
                                     </div>
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-md-2">
-                                            Add Here
-                                        </div>
-                                        <div class="col-md-5">
-                                            <v-select autofocus @change.native="changed" ref="test" label="name" taggable :filterable="false" :options="options" @search="onSearch" @keyup.delete.native="myFunction">
-                                                <template slot="no-options">
-                                                   Type what you want here or scan if you are feeling lazy..
-                                                </template>
-                                            </v-select>
-                                        </div>
-                                        <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
-                                        <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button>
-                                    </div>
-                                    <br>
-                                    <div class="row" style="width: 100%;">
+                                    <div class="row" style="width: 100%; position: sticky; bottom: 0;">
                                         <table class="table">
-                                            <thead class="thead-light">
+                                            <thead>
                                                 <tr>
-                                                    <th scope="col" style="cursor: pointer;"></th>
-                                                    <th scope="col"><span style="cursor: pointer;">All Bills</span></th>
-                                                    <th scope="col"><span style="cursor: pointer;">Recall Bills</span></th>
-                                                    <th scope="col"><span style="cursor: pointer;">Minimise</span></th>
-                                                    <th scope="col"><span style="cursor: pointer;">Save And Close</span></th>
-                                                    <th scope="col"><span style="cursor: pointer;">Save And Print</span></th>
+                                                    <th scope="col"></th>
+                                                    <th scope="col"></th>
+                                                    <th>
+                                                        <span>Disc %:&nbsp;&nbsp;</span>
+                                                        <input @keyup="calDiscAmt" v-model="discPercent" type="number" style="width: 14%; text-align: center;">
+                                                    </th>
+                                                    <th scope="col">
+                                                        <span>Disc Amt:&nbsp;&nbsp;</span>
+                                                        <input @keyup="calDiscPercent" v-model="discAmt" type="number" style="width: 14%; text-align: center;">
+                                                    </th>
+                                                    <th scope="col">
+                                                        <span>Grand Total:&nbsp;&nbsp;</span>
+                                                        <span v-if="grandTotal > 0">@{{ grandTotal }}</span>
+                                                    </th>
+                                                    <th scope="col"></th>
+                                                </tr>
+                                                <tr>
+                                                    <td style="cursor: pointer;"></td>
+                                                    <td><span style="cursor: pointer;">All Bills</span></td>
+                                                    <td><span style="cursor: pointer;">Recall Bills</span></td>
+                                                    <td><span style="cursor: pointer;">Minimise</span></td>
+                                                    <td><span style="cursor: pointer;">Save And Close</span></td>
+                                                    <td><span style="cursor: pointer;">Save And Print</span></td>
                                                 </tr>
                                             </thead>
-                                        </table>                             
+                                        </table>
+                                        <notifications group="foo" position="top center" width="50%">
+
+                                        </notifications>                         
                                     </div>
                                 </div>
                             </invoicer>

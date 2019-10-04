@@ -14,12 +14,46 @@
                 billItems: [],
                 selectFlag: false,
                 makeRequest: true,
-                magic_flag: true
+                magic_flag: true,
+                discAmt: null,
+                discPercent: null
             }
         },
         
         mounted() {
             this.focusOnSearch();
+        },
+
+        computed: {
+            grandTotal() {
+                if (this.billItems.length > 0) {
+                    let total = 0;
+                    _.forEach(this.billItems, (item, key) => {
+                        total += parseFloat(item.mrp) * parseInt(item.qty);
+                    });
+                    if (this.discAmt) {
+                        total -= this.discAmt;
+                    } else if(this.discPercent) {
+                        total -= total * (this.discPercent/100); 
+                    }
+                    return total;
+                }
+
+                return 0;
+            },
+
+            billTotal() {
+                if (this.billItems.length > 0) {
+                    let total = 0;
+                    _.forEach(this.billItems, (item, key) => {
+                        total += parseFloat(item.mrp) * parseInt(item.qty);
+                    });
+                    
+                    return total;
+                }
+
+                return 0;
+            }
         },
 
         methods: {
@@ -89,8 +123,17 @@
                     this.selectFlag = false;
                     this.itemOptions = [];
                     if (response.data == 'No Products Found.') {
-                        vm.options.push("Sorry, I got nothing here Man!");
+                        vm.options.push("I got nothing here Man!");
                         this.selectFlag = true;
+                        Vue.notify({
+                            group: 'foo',
+                            title: 'What you  doing bro!',
+                            text: 'I got nothing here!',
+                            type: 'error',
+                            duration: 3000,
+                            speed: 1000
+                        });
+                        this.focusOnSearch();
                         return;
                     }
 
@@ -136,7 +179,7 @@
             addToBill() {
                 console.log(this.checkIfAdded());
                 if (this.checkIfAdded()) {
-                    this.test();
+                    this.notify("Product already added. Update Quantity instead.");
                     return;
                 }
                 this.billItems.push(this.newItem);
@@ -147,6 +190,11 @@
                 this.timer3 = setTimeout(() => {
                     var container = this.$el.querySelector("#billing-table");
                     container.scrollTop = container.scrollHeight;
+                    window.scrollTo({
+                        top: document.body.scrollHeight || document.documentElement.scrollHeight,
+                        left: 0,
+                        behavior: 'smooth'
+                    });
                 }, 50);
             },
 
@@ -216,17 +264,33 @@
                 return false;
             },
 
+            notify(text) {
+                Vue.notify({
+                    group: 'foo',
+                    title: 'Important message',
+                    text: text,
+                    type: 'error',
+                    duration: 3000,
+                    speed: 1000
+                });
+            },
+
             test() {
-                Swal.fire({
-                    position: 'top-center',
-                    type: 'warning',
-                    title: 'Dude! this item is already added. Update the Quanity instead.',
-                    showConfirmButton: true,
-                    confirmButtonText: 'Oh! Okay Okay'
-                })
+                //window.animate({ scrollTop: document.body.scrollHeight || document.documentElement.scrollHeight }, 400);
+                // window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+            },
+
+            calDiscPercent() {
+                if (this.discAmt > 0) {
+                    this.discPercent = (this.discAmt/this.billTotal) * 100;
+                }
+            },
+
+            calDiscAmt() {
+                if (this.discPercent > 0 && this.discPercent < 20) {
+                    this.discAmt = (this.discPercent/100) * this.billTotal;
+                }
             }
-
-
         }
     }
 </script>

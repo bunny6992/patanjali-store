@@ -2,7 +2,7 @@
     export default {
     	data: function () {
             return {
-            	route: null,
+            	route: 'sale',
                 file: '',
             }
         },

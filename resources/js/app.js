@@ -14,6 +14,9 @@ import 'vue-search-select/dist/VueSearchSelect.css';
 window._ = require('lodash');
 // import Swal from 'sweetalert2';
 window.Swal = require('sweetalert2');
+import Notifications from 'vue-notification';
+Vue.use(Notifications);
+// window._ = require('vue-notification');
 
 /**
  * The following block of code may be used to automatically register your

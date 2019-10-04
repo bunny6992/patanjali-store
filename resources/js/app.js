@@ -12,6 +12,8 @@ import 'vue-select/dist/vue-select.css';
 import { ModelSelect } from 'vue-search-select';
 import 'vue-search-select/dist/VueSearchSelect.css';
 window._ = require('lodash');
+// import Swal from 'sweetalert2';
+window.Swal = require('sweetalert2');
 
 /**
  * The following block of code may be used to automatically register your
@@ -29,6 +31,7 @@ Vue.component('router-component', require('./components/RouterComponent.vue').de
 Vue.component('invoicer', require('./components/Invoicer.vue').default);
 Vue.component('v-select', vSelect);
 Vue.component('model-select', ModelSelect);
+Vue.component('sweet-alert', Swal);
 
 
 

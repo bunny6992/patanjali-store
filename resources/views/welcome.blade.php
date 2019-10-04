@@ -10,6 +10,15 @@
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
         <link href="css/app.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="{{ asset('fontawesome/css/all.css') }}">
+        <style type="text/css">
+            input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
+        </style>
     </head>
     <body style="overflow-x: hidden;">
         <div id="app">
@@ -51,7 +60,7 @@
                             Sale
                             <invoicer inline-template>
                                 <div style="font-size: 18px;">
-                                    <div class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
+                                    <div id="billing-table" class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
                                         <div class="col-md-12">
                                             <table class="table">
                                                 <thead class="thead-dark">
@@ -66,14 +75,14 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Soyavita</td>
-                                                        <td>10%</td>
-                                                        <td>10</td>
-                                                        <td><i class="fas fa-minus-circle" style="font-size: 15px; cursor: pointer;"></i>  2  <i class="fas fa-plus-circle" style="font-size: 15px; cursor: pointer;"></i></td>
-                                                        <td>20</td>
-                                                        <td><i class="fas fa-trash" style="cursor: pointer;"></i></td>
+                                                    <tr v-for="(item, index) in billItems">
+                                                        <th scope="row">@{{ index + 1 }}</th>
+                                                        <td>@{{ item.name }}</td>
+                                                        <td>@{{ item.tax }}%</td>
+                                                        <td>@{{ item.mrp }}</td>
+                                                        <td style="width: 10%;"><i @click="decreaseQty(item)" class="fas fa-minus-circle" style="font-size: 15px; cursor: pointer;"></i>  <input type="number" name="qty" v-model="item.qty" style="width: 36%; text-align: center; border-radius: 10%;">  <i class="fas fa-plus-circle" style="font-size: 15px; cursor: pointer;" @click="increaseQty(item)"></i></td>
+                                                        <td>@{{ item.mrp * item.qty }}</td>
+                                                        <td><i @click="removeItem(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -84,13 +93,15 @@
                                         <div class="col-md-2">
                                             Add Here
                                         </div>
-                                        <div class="col-md-3">
-                                            <v-select ref="test" label="name" taggable :filterable="false" :options="options" @search="onSearch">
+                                        <div class="col-md-5">
+                                            <v-select autofocus @change.native="changed" ref="test" label="name" taggable :filterable="false" :options="options" @search="onSearch" @keyup.delete.native="myFunction">
                                                 <template slot="no-options">
-                                                    type to search GitHub repositories..
+                                                   Type what you want here or scan if you are feeling lazy..
                                                 </template>
                                             </v-select>
                                         </div>
+                                        <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button>
                                     </div>
                                     <br>
                                     <div class="row" style="width: 100%;">

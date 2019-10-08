@@ -20,3 +20,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 //Route::get('getItems/{query}', 'Api/ApiController@getItems');
 
 Route::get('get-items/{query}', 'Api\ApiController@getItems');
+Route::resource('invoice', 'Api\InvoiceController');

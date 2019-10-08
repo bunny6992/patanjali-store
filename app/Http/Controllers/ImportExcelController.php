@@ -8,6 +8,9 @@ use Excel;
 use App\Exports\ProductsExport;
 use App\Imports\ProductsImport;
 use App\Imports\ProductsUpdate;
+use Mike42\Escpos\Printer;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 
 class ImportExcelController extends Controller
 {
@@ -38,6 +41,6 @@ class ImportExcelController extends Controller
         Excel::import(new ProductsUpdate,request()->file('file'));
         //request()->file('file')->storeAs('uploads', time().".xlsx");
         return back();
-    }   
+    }
 
 }

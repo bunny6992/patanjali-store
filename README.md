@@ -30,6 +30,7 @@ invoices
 	- grand total
 	- profit
 	- type
+	- payment mode
 
 invoice product
 	- invoice id
@@ -37,6 +38,10 @@ invoice product
 	- product id
 	- batch id
 	- qty
+	- avg_cost
+	- mrp
+	- discount
+	- discount in percent
 	- product total
 	- product profit
 	- type

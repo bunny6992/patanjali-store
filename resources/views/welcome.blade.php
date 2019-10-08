@@ -88,6 +88,7 @@ input[type=number]::-webkit-outer-spin-button {
                                                         <th scope="col">Product</th>
                                                         <th scope="col">Tax</th>
                                                         <th scope="col">Price Incl. Tax</th>
+                                                        <th scope="col">Qty Available</th>
                                                         <th scope="col">Qty</th>
                                                         <th scope="col">Amount</th>
                                                         <th scope="col">Actions</th>
@@ -99,7 +100,8 @@ input[type=number]::-webkit-outer-spin-button {
                                                         <td>@{{ item.name }}</td>
                                                         <td>@{{ item.tax }}%</td>
                                                         <td>@{{ item.mrp }}</td>
-                                                        <td style="width: 10%;"><i @click="decreaseQty(item)" class="fas fa-minus-circle" style="font-size: 15px; cursor: pointer;"></i>  <input type="number" name="qty" v-model="item.qty" style="width: 45%; text-align: center; border-radius: 10%;">  <i class="fas fa-plus-circle" style="font-size: 15px; cursor: pointer;" @click="increaseQty(item)"></i></td>
+                                                        <td>@{{ item.qty_avl }}</td>
+                                                        <td style="width: 10%;"><i @click="decreaseQty(item)" class="fas fa-minus-circle" style="font-size: 15px; cursor: pointer;"></i>  <input @input="qtyChanged($event.target.value, item)" type="number" name="qty" v-model="item.qty" style="width: 45%; text-align: center; border-radius: 10%;">  <i class="fas fa-plus-circle" style="font-size: 15px; cursor: pointer;" @click="increaseQty(item)"></i></td>
                                                         <td>@{{ item.mrp * item.qty }}</td>
                                                         <td><i @click="removeItem(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
                                                     </tr>
@@ -133,7 +135,7 @@ input[type=number]::-webkit-outer-spin-button {
                                                     <td><span style="cursor: pointer;">Recall Bills</span></td>
                                                     <td><span style="cursor: pointer;">Minimise</span></td>
                                                     <td><span style="cursor: pointer;">Save And Close</span></td>
-                                                    <td><span style="cursor: pointer;">Save And Print</span></td>
+                                                    <td><span style="cursor: pointer;" @click="saveAndPrint()">Save And Print</span></td>
                                                 </tr>
                                             </thead>
                                         </table>

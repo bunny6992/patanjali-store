@@ -1887,7 +1887,8 @@ __webpack_require__.r(__webpack_exports__);
       makeRequest: true,
       magic_flag: true,
       discAmt: null,
-      discPercent: null
+      discPercent: null,
+      paymentMode: "cash"
     };
   },
   mounted: function mounted() {
@@ -2026,6 +2027,7 @@ __webpack_require__.r(__webpack_exports__);
               batch_id: value.batch_id,
               name: value.name,
               mrp: value.mrp,
+              qty_avl: parseInt(value.qty),
               tax: value.tax
             });
           });
@@ -2040,6 +2042,7 @@ __webpack_require__.r(__webpack_exports__);
             name: response.data[0].name,
             mrp: response.data[0].mrp,
             tax: response.data[0].tax,
+            qty_avl: parseInt(response.data[0].qty),
             product_id: response.data[0].product_id,
             batch_id: response.data[0].batch_id,
             qty: 1
@@ -2086,12 +2089,29 @@ __webpack_require__.r(__webpack_exports__);
       }, 50);
     },
     increaseQty: function increaseQty(billItem) {
+      if (billItem.qty == billItem.qty_avl) {
+        this.notify("That's all the quantity we have Man!");
+        return;
+      }
+
       billItem.qty = parseInt(billItem.qty) + 1;
     },
     decreaseQty: function decreaseQty(billItem) {
       if (parseInt(billItem.qty) > 1) {
         billItem.qty = parseInt(billItem.qty) - 1;
       }
+    },
+    qtyChanged: function qtyChanged(val, billItem) {
+      if (val >= billItem.qty_avl) {
+        this.notify("Quantity can't be more than " + billItem.qty_avl);
+        billItem.qty = billItem.qty_avl;
+        return;
+      } // if (val == 0) {
+      //     this.notify("Quantity can't be 0. Remove item from the bill instead");
+      //     billItem.qty = 1;
+      //     return;
+      // }
+
     },
     removeItem: function removeItem(index) {
       this.$delete(this.billItems, index);
@@ -2111,12 +2131,14 @@ __webpack_require__.r(__webpack_exports__);
           });
 
           if (item) {
+            console.log(item);
             _this5.newItem = {
               id: item.name + " MRP-" + item.mrp,
               name: item.name,
               mrp: item.mrp,
               tax: item.tax,
               product_id: item.product_id,
+              qty_avl: item.qty_avl,
               batch_id: item.batch_id,
               qty: 1
             }; // this.askForQty();
@@ -2176,7 +2198,30 @@ __webpack_require__.r(__webpack_exports__);
       if (this.discPercent > 0 && this.discPercent < 20) {
         this.discAmt = this.discPercent / 100 * this.billTotal;
       }
-    }
+    },
+    saveAndPrint: function saveAndPrint() {
+      this.saveBill();
+      this.printBill();
+    },
+    saveBill: function saveBill() {
+      var _this6 = this;
+
+      var data = {};
+      data.billItems = this.billItems;
+      data.billTotal = this.billTotal;
+      data.grandTotal = this.grandTotal;
+      data.discAmt = this.discAmt;
+      data.discPercent = this.discPercent;
+      data.paymentMode = this.paymentMode;
+      axios.post("api/invoice", data).then(function (response) {
+        console.log('File Sent!');
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this6.errors = error.response.data.errors || {};
+        }
+      });
+    },
+    printBill: function printBill() {}
   }
 });
 

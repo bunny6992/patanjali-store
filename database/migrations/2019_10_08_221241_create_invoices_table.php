@@ -19,7 +19,7 @@ class CreateInvoicesTable extends Migration
             $table->integer('total_qty')->nullable();
             $table->decimal('total', 8, 2);
             $table->decimal('discount', 8, 2)->nullable();
-            $table->decimal('discount_percent', 3, 2)->nullable();
+            $table->decimal('discount_percent', 8, 2)->nullable();
             $table->decimal('grand_total', 8, 2);
             $table->decimal('profit', 8, 2)->nullable();
             $table->string('type');

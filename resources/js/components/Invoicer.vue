@@ -17,7 +17,7 @@
                 magic_flag: true,
                 discAmt: null,
                 discPercent: null,
-                paymentMode: "cash"
+                paymentMode: "Cash"
             }
         },
         
@@ -305,21 +305,36 @@
             calDiscPercent() {
                 if (this.discAmt > 0) {
                     this.discPercent = (this.discAmt/this.billTotal) * 100;
+                } else {
+                    this.discPercent = null;
                 }
             },
 
             calDiscAmt() {
                 if (this.discPercent > 0 && this.discPercent < 20) {
                     this.discAmt = (this.discPercent/100) * this.billTotal;
+                } else {
+                    this.discAmt = null;
                 }
             },
 
             saveAndPrint() {
-                this.saveBill();
-                this.printBill();
+                if (this.billItems.length == 0) {
+                    this.notify("There is nothing to save here!");
+                    return;
+                }
+                this.saveBill(true);
             },
 
-            saveBill() {
+            saveAndClose() {
+                if (this.billItems.length == 0) {
+                    this.notify("There is nothing to save here!");
+                    return;
+                }
+                this.saveBill();
+            },
+
+            saveBill(printBill = false) {
                 let data = {};
                 data.billItems = this.billItems;
                 data.billTotal = this.billTotal;
@@ -329,16 +344,57 @@
                 data.paymentMode = this.paymentMode;
                 axios.post("api/invoice", data)
                 .then(response => {
-                        console.log('File Sent!');
+                    Vue.notify({
+                        group: 'foo',
+                        title: 'Yay!',
+                        text: 'Saved Successfully!',
+                        type: 'success',
+                        duration: 3000,
+                        speed: 1000
+                    });
+                    if (printBill) {
+                        this.printBill();
+                    }
+                    this.resetSearch();
+                    this.itemOptions = [];
+                    this.newItem = {};
+                    this.billItems = [];
+                    this.selectFlag = false;
+                    this.makeRequest = true;
+                    this.discAmt = null;
+                    this.discPercent = null;
+                    this.paymentMode = "Cash";
                 }).catch(error => {
                     if (error.response.status === 422) {
-                      this.errors = error.response.data.errors || {};
+                        this.errors = error.response.data.errors || {};
                     }
                 });
             },
 
             printBill() {
+                this.Popup($(document.getElementById("printMe")).html());
+            },
 
+            Popup(data) {
+                var mywindow = window.open('', 'new div', 'height=400,width=600');
+                mywindow.document.write('<html><head><title></title>');
+                mywindow.document.write('<link rel="stylesheet" href="css/app.css" type="text/css" />');
+                mywindow.document.write('</head><body >');
+                mywindow.document.write(data);
+                mywindow.document.write('</body></html>');
+                // mywindow.document.close();
+                // mywindow.focus();
+                setTimeout(() => {
+                    mywindow.print();
+                    mywindow.close();
+                },1000);
+                return true;
+            },
+
+            print() {
+                // Pass the element id here
+                // this.$htmlToPaper('printMe');
+                
             }
         }
     }

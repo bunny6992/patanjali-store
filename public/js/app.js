@@ -1888,7 +1888,7 @@ __webpack_require__.r(__webpack_exports__);
       magic_flag: true,
       discAmt: null,
       discPercent: null,
-      paymentMode: "cash"
+      paymentMode: "Cash"
     };
   },
   mounted: function mounted() {
@@ -2192,20 +2192,37 @@ __webpack_require__.r(__webpack_exports__);
     calDiscPercent: function calDiscPercent() {
       if (this.discAmt > 0) {
         this.discPercent = this.discAmt / this.billTotal * 100;
+      } else {
+        this.discPercent = null;
       }
     },
     calDiscAmt: function calDiscAmt() {
       if (this.discPercent > 0 && this.discPercent < 20) {
         this.discAmt = this.discPercent / 100 * this.billTotal;
+      } else {
+        this.discAmt = null;
       }
     },
     saveAndPrint: function saveAndPrint() {
+      if (this.billItems.length == 0) {
+        this.notify("There is nothing to save here!");
+        return;
+      }
+
+      this.saveBill(true);
+    },
+    saveAndClose: function saveAndClose() {
+      if (this.billItems.length == 0) {
+        this.notify("There is nothing to save here!");
+        return;
+      }
+
       this.saveBill();
-      this.printBill();
     },
     saveBill: function saveBill() {
       var _this6 = this;
 
+      var printBill = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       var data = {};
       data.billItems = this.billItems;
       data.billTotal = this.billTotal;
@@ -2214,14 +2231,56 @@ __webpack_require__.r(__webpack_exports__);
       data.discPercent = this.discPercent;
       data.paymentMode = this.paymentMode;
       axios.post("api/invoice", data).then(function (response) {
-        console.log('File Sent!');
+        Vue.notify({
+          group: 'foo',
+          title: 'Yay!',
+          text: 'Saved Successfully!',
+          type: 'success',
+          duration: 3000,
+          speed: 1000
+        });
+
+        if (printBill) {
+          _this6.printBill();
+        }
+
+        _this6.resetSearch();
+
+        _this6.itemOptions = [];
+        _this6.newItem = {};
+        _this6.billItems = [];
+        _this6.selectFlag = false;
+        _this6.makeRequest = true;
+        _this6.discAmt = null;
+        _this6.discPercent = null;
+        _this6.paymentMode = "Cash";
       })["catch"](function (error) {
         if (error.response.status === 422) {
           _this6.errors = error.response.data.errors || {};
         }
       });
     },
-    printBill: function printBill() {}
+    printBill: function printBill() {
+      this.Popup($(document.getElementById("printMe")).html());
+    },
+    Popup: function Popup(data) {
+      var mywindow = window.open('', 'new div', 'height=400,width=600');
+      mywindow.document.write('<html><head><title></title>');
+      mywindow.document.write('<link rel="stylesheet" href="css/app.css" type="text/css" />');
+      mywindow.document.write('</head><body >');
+      mywindow.document.write(data);
+      mywindow.document.write('</body></html>'); // mywindow.document.close();
+      // mywindow.focus();
+
+      setTimeout(function () {
+        mywindow.print();
+        mywindow.close();
+      }, 1000);
+      return true;
+    },
+    print: function print() {// Pass the element id here
+      // this.$htmlToPaper('printMe');
+    }
   }
 });
 
@@ -41106,6 +41165,29 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
+/***/ "./node_modules/vue-html-to-paper/dist/index.js":
+/*!******************************************************!*\
+  !*** ./node_modules/vue-html-to-paper/dist/index.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports=function(e){function t(r){if(n[r])return n[r].exports;var o=n[r]={i:r,l:!1,exports:{}};return e[r].call(o.exports,o,o.exports,t),o.l=!0,o.exports}var n={};return t.m=e,t.c=n,t.d=function(e,n,r){t.o(e,n)||Object.defineProperty(e,n,{configurable:!1,enumerable:!0,get:r})},t.n=function(e){var n=e&&e.__esModule?function(){return e.default}:function(){return e};return t.d(n,"a",n),n},t.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},t.p="",t(t.s=0)}([function(e,t,n){"use strict";function r(e,t){t.forEach(function(t){var n=e.document.createElement("link");n.setAttribute("rel","stylesheet"),n.setAttribute("type","text/css"),n.setAttribute("href",t),e.document.getElementsByTagName("head")[0].appendChild(n)})}Object.defineProperty(t,"__esModule",{value:!0}),t.default={install:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};e.mixin({methods:{$htmlToPaper:function(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:function(){return!0},o=t.name,i=void 0===o?"_blank":o,u=t.specs,l=void 0===u?["fullscreen=yes","titlebar=yes","scrollbars=yes"]:u,c=t.replace,s=void 0===c||c,a=t.styles,d=void 0===a?[]:a;l=l.length?l.join(","):"";var f=document.getElementById(e);if(!f)return void alert("Element to print #"+e+" not found!");var m=window.open("",i,l,s);return m.document.write("\n            <html>\n              <head>\n                <title>"+document.title+"</title>\n              </head>\n              <body>\n                "+f.innerHTML+"\n              </body>\n            </html>\n          "),r(m,d),setTimeout(function(){m.document.close(),m.focus(),m.print(),m.close(),n()},1e3),!0}}})}}}]);
+
+/***/ }),
+
+/***/ "./node_modules/vue-html-to-paper/index.js":
+/*!*************************************************!*\
+  !*** ./node_modules/vue-html-to-paper/index.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(/*! ./dist */ "./node_modules/vue-html-to-paper/dist/index.js");
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
 /*!*******************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
@@ -59518,6 +59600,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_search_select_dist_VueSearchSelect_css__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(vue_search_select_dist_VueSearchSelect_css__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var vue_notification__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vue-notification */ "./node_modules/vue-notification/dist/index.js");
 /* harmony import */ var vue_notification__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(vue_notification__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var vue_html_to_paper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! vue-html-to-paper */ "./node_modules/vue-html-to-paper/index.js");
+/* harmony import */ var vue_html_to_paper__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_5__);
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -59534,7 +59618,8 @@ window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 
 window.Swal = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
 
-Vue.use(vue_notification__WEBPACK_IMPORTED_MODULE_4___default.a); // window._ = require('vue-notification');
+Vue.use(vue_notification__WEBPACK_IMPORTED_MODULE_4___default.a);
+ // window._ = require('vue-notification');
 
 /**
  * The following block of code may be used to automatically register your
@@ -59552,6 +59637,7 @@ Vue.component('invoicer', __webpack_require__(/*! ./components/Invoicer.vue */ "
 Vue.component('v-select', vue_select__WEBPACK_IMPORTED_MODULE_0___default.a);
 Vue.component('model-select', vue_search_select__WEBPACK_IMPORTED_MODULE_2__["ModelSelect"]);
 Vue.component('sweet-alert', Swal);
+Vue.use(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_5___default.a);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

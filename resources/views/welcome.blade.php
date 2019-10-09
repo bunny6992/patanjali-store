@@ -79,6 +79,107 @@ input[type=number]::-webkit-outer-spin-button {
                                         <!-- <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button> -->
                                     </div>
 
+                                    <div hidden="true">
+                                        <!-- SOURCE -->
+                                        <div id="printMe">
+                                            <div class="row" style="font-size: 18px; font-weight: bold; margin-top: 2%; margin-bottom: 1%">
+                                                <div class="col-md-1"></div>
+                                                <div class="col-md-2"><br>
+                                                    Invoice No. &nbsp; 1
+                                                </div>
+                                                <div class="col-md-6" style="text-align: center;">
+                                                    Patanjali Aarogya Kendra <br>
+                                                    Sai Ram Store,<br>
+                                                    Bhim Chowk, Jaripatka, Nagpur-440014 <br>
+                                                    9595034566
+                                                </div>      
+                                                <div class="col-md-3"><br>
+                                                    10/10/2019 01:18:05 am
+                                                </div>
+                                                <!-- <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                Invoice No. &nbsp; 1
+                                                            </th>
+                                                            <th></th>
+                                                            <th style="text-align: center;">
+                                                                Patanjali Aarogya Kendra <br>
+                                                                Sai Ram Store,<br>
+                                                                Bhim Chowk, Jaripatka, Nagpur-440014 <br>
+                                                                9595034566
+                                                            </th>
+                                                            <th>
+                                                                
+                                                            </th>
+                                                            <th>
+                                                               10/10/2019 01:18:05 am
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                </table> -->
+
+                                            </div>
+                                            <div class="row" style="font-size: 22px;">
+                                                <div class="col-md-12">
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">Sr. No.</th>
+                                                                <th scope="col">Product</th>
+                                                                <th scope="col">Tax</th>
+                                                                <th scope="col">Price Incl. Tax</th>
+                                                                <th scope="col">Qty</th>
+                                                                <th scope="col">Amount</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="font-size: 22px;">
+                                                            <tr v-for="(item, index) in billItems">
+                                                                <th scope="row">@{{ index + 1 }}</th>
+                                                                <th scope="row">@{{ item.name }}</th>
+                                                                <th scope="row">@{{ item.tax }}%</th>
+                                                                <th scope="row">@{{ item.mrp }}</th>
+                                                                <th scope="row">@{{ item.qty }}</th>
+                                                                <th scope="row">@{{ item.mrp * item.qty }}</th>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <table class="table" style="font-size: 22px;">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">
+                                                                </th>
+                                                                <th scope="col"></th>
+                                                                <th scope="col">
+                                                                    <span v-if="discPercent">
+                                                                        <span>Disc %:&nbsp;&nbsp;</span>
+                                                                        <span>@{{ discPercent }}</span>
+                                                                    </span>
+                                                                </th>
+                                                                <th scope="col">
+                                                                    <span v-if="discAmt">
+                                                                        <span>Disc Amt:&nbsp;&nbsp;</span>
+                                                                        <span>@{{ discAmt }}</span>
+                                                                    </span>
+                                                                </th>
+                                                                <th scope="col" style="width: 30%;">
+                                                                    <span>Grand Total:&nbsp;&nbsp;</span>
+                                                                    <span style="font-size: 36px;">@{{ grandTotal }}</span>
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                    </table>                                                    
+                                                </div>
+                                            </div>
+                                            <h4 style="text-align: center;">It was great to see you<br>!! Do visit again !!</h4>
+                                            
+                                        </div>
+                                    </div>
+
                                     <div id="billing-table" class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
                                         <div class="col-md-12">
                                             <table class="table">
@@ -113,7 +214,14 @@ input[type=number]::-webkit-outer-spin-button {
                                         <table class="table">
                                             <thead>
                                                 <tr>
-                                                    <th scope="col"></th>
+                                                    <th scope="col">Payment Mode: 
+                                                        <select v-model="paymentMode">
+                                                            <option disabled value="">Please select one</option>
+                                                            <option>Cash</option>
+                                                            <option>Paytm</option>
+                                                            <option>Patanjali Card</option>
+                                                        </select>
+                                                    </th>
                                                     <th scope="col"></th>
                                                     <th>
                                                         <span>Disc %:&nbsp;&nbsp;</span>
@@ -130,12 +238,11 @@ input[type=number]::-webkit-outer-spin-button {
                                                     <th scope="col"></th>
                                                 </tr>
                                                 <tr>
-                                                    <td style="cursor: pointer;"></td>
-                                                    <td><span style="cursor: pointer;">All Bills</span></td>
-                                                    <td><span style="cursor: pointer;">Recall Bills</span></td>
-                                                    <td><span style="cursor: pointer;">Minimise</span></td>
-                                                    <td><span style="cursor: pointer;">Save And Close</span></td>
-                                                    <td><span style="cursor: pointer;" @click="saveAndPrint()">Save And Print</span></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td><span style="cursor: pointer; padding: 7px; background-color: seagreen; color: white;" @click="saveAndClose()">Save And New</span></td>
+                                                    <td><span style="cursor: pointer; padding: 7px; background-color: seagreen; color: white;" @click="saveAndPrint()">Save And Print</span></td>
                                                 </tr>
                                             </thead>
                                         </table>

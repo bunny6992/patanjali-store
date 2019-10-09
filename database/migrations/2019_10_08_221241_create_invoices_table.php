@@ -16,14 +16,14 @@ class CreateInvoicesTable extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('products_count');
-            $table->integer('total_qty');
+            $table->integer('total_qty')->nullable();
             $table->decimal('total', 8, 2);
-            $table->decimal('discount', 8, 2);
-            $table->decimal('discount_percent', 3, 2);
+            $table->decimal('discount', 8, 2)->nullable();
+            $table->decimal('discount_percent', 3, 2)->nullable();
             $table->decimal('grand_total', 8, 2);
-            $table->decimal('profit', 8, 2);
+            $table->decimal('profit', 8, 2)->nullable();
             $table->string('type');
-            $table->decimal('avg_cost', 8, 2);
+            $table->decimal('total_cost', 8, 2)->nullable();
             $table->string('payment_mode');
             $table->timestamps();
         });

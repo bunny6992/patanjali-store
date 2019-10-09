@@ -16,6 +16,7 @@ window._ = require('lodash');
 window.Swal = require('sweetalert2');
 import Notifications from 'vue-notification';
 Vue.use(Notifications);
+import VueHtmlToPaper from 'vue-html-to-paper';
 // window._ = require('vue-notification');
 
 /**
@@ -35,6 +36,7 @@ Vue.component('invoicer', require('./components/Invoicer.vue').default);
 Vue.component('v-select', vSelect);
 Vue.component('model-select', ModelSelect);
 Vue.component('sweet-alert', Swal);
+Vue.use(VueHtmlToPaper);
 
 
 

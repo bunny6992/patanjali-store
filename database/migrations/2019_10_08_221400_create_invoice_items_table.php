@@ -18,16 +18,12 @@ class CreateInvoiceItemsTable extends Migration
             $table->integer('invoice_id');
             $table->integer('product_id');
             $table->integer('batch_id');
-            $table->bigInteger('barcode');
+            $table->string('name');
             $table->integer('tax');
             $table->integer('mrp');
             $table->integer('qty');
             $table->decimal('avg_cost', 8, 2);
-            $table->integer('total');
-            $table->decimal('discount', 8, 2);
-            $table->decimal('discount_percent', 3, 2);
             $table->decimal('row_total', 8, 2);
-            $table->decimal('profit', 8, 2);
             $table->string('type');
             $table->timestamps();
         });

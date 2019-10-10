@@ -2260,6 +2260,9 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
     },
+    getInvoices: function getInvoices() {
+      this.$parent.route = "invoices";
+    },
     printBill: function printBill() {
       this.Popup($(document.getElementById("printMe")).html());
     },
@@ -59600,8 +59603,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_search_select_dist_VueSearchSelect_css__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(vue_search_select_dist_VueSearchSelect_css__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var vue_notification__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vue-notification */ "./node_modules/vue-notification/dist/index.js");
 /* harmony import */ var vue_notification__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(vue_notification__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var vue_html_to_paper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! vue-html-to-paper */ "./node_modules/vue-html-to-paper/index.js");
-/* harmony import */ var vue_html_to_paper__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var vue_html_to_paper__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! vue-html-to-paper */ "./node_modules/vue-html-to-paper/index.js");
+/* harmony import */ var vue_html_to_paper__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_6__);
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -59637,7 +59640,7 @@ Vue.component('invoicer', __webpack_require__(/*! ./components/Invoicer.vue */ "
 Vue.component('v-select', vue_select__WEBPACK_IMPORTED_MODULE_0___default.a);
 Vue.component('model-select', vue_search_select__WEBPACK_IMPORTED_MODULE_2__["ModelSelect"]);
 Vue.component('sweet-alert', Swal);
-Vue.use(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_5___default.a);
+Vue.use(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_6___default.a);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

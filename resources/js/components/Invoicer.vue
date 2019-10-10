@@ -371,6 +371,10 @@
                 });
             },
 
+            getInvoices() {
+                this.$parent.route = "invoices";
+            },
+
             printBill() {
                 this.Popup($(document.getElementById("printMe")).html());
             },

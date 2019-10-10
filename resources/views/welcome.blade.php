@@ -42,7 +42,7 @@ input[type=number]::-webkit-outer-spin-button {
                             <a style="font-size: x-large;">Sales</a>
                             <div class="dropdown-content">
                                 <a href="#" @click="route = 'sale'">Sale</a>
-                                <a href="#" @click="route = 'return'">Return</a>
+                                <a href="#" @click="route = 'invoices'">Invoices</a>
                             </div>
                         </div>
                         <div class="dropdown" style="margin-left: 2%;">
@@ -253,8 +253,38 @@ input[type=number]::-webkit-outer-spin-button {
                                 </div>
                             </invoicer>
                         </div>
-                        <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'return'">
-                            Return
+                        <div class="m-b-md" v-else-if="route === 'invoices'">
+                            <span style="font-size: 65px;">Invoices</span>
+                            <div id="billing-table" class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
+                                <div class="col-md-12">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th scope="col">Invoice No.</th>
+                                                <th scope="col">Date</th>
+                                                <th scope="col">Disc Amt</th>
+                                                <th scope="col">Disc %</th>
+                                                <th scope="col">No of Items</th>
+                                                <th scope="col">Payment Mode</th>
+                                                <th scope="col">Total</th>
+                                                <th scope="col">Grand Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(inv, index) in invoices">
+                                                <th scope="row">@{{ inv.id }}</th>
+                                                <td>@{{ inv.created_at }}</td>
+                                                <td>@{{ inv.discount }}%</td>
+                                                <td>@{{ inv.discount_percent }}</td>
+                                                <td>@{{ inv.products_count }}</td>
+                                                <td>@{{ inv.payment_mode }}</td>
+                                                <td>@{{ inv.total }}</td>
+                                                <td>@{{ inv.grand_total }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                         <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'stockList'">
                             Stock List

@@ -32,11 +32,13 @@ class ApiController extends Controller
                     'tax' => $product->tax,
                     'mrp' => $batch->mrp,
                     'qty' => $batch->qty,
-                    'avg_cost' => $batch->avg_cost
+                    'avg_cost' => $batch->avg_cost,
+                    'barcode' => $product->barcode
                 ];
+                if ($batch->qty > 0) {
+                    array_push($return, $returnProduct);
+                }                
             }
-
-    		array_push($return, $returnProduct);
     	}
 
         return $return;

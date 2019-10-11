@@ -34,6 +34,21 @@
 
             handleFileUpload(){
                 this.file = this.$refs.file.files[0];
+            },
+
+            getInvoices() {
+                if (this.$refs.invoicer) {
+                    this.$refs.invoicer.resetData();
+                    this.$refs.invoicer.getInvoices();
+                }
+            },
+
+            getInvoicer() {
+                this.route = 'sale';
+                if (this.$refs.invoicer) {
+                    this.$refs.invoicer.resetData();
+                }
+                
             }
         }
     }

@@ -18,7 +18,8 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        //
+        $returnData = Invoice::orderBy('id','DESC')->get();
+        return $returnData;
     }
 
     /**
@@ -47,8 +48,9 @@ class InvoiceController extends Controller
         $invoice->grand_total = $requestData['grandTotal'];
         $invoice->discount = $requestData['discAmt'];
         $invoice->discount_percent =  $requestData['discPercent'];
-        $invoice->type = 'sale';
+        $invoice->type = $requestData['type'];
         $invoice->payment_mode = $requestData['paymentMode'];
+        $invoice->recharge_amount = $requestData['rechargeAmt'];
         $invoice->save();
 
         $totalCost = 0;
@@ -89,7 +91,12 @@ class InvoiceController extends Controller
      */
     public function show($id)
     {
-        //
+        $returnData = Invoice::find($id);
+        foreach ($returnData->invoiceItems as $key => $value) {
+            $value->return_qty = 0;
+        }
+        
+        return $returnData;
     }
 
     /**

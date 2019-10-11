@@ -18,6 +18,22 @@ input[type=number]::-webkit-outer-spin-button {
     appearance: none;
     margin: 0; 
 }
+.VuePagination {
+  text-align: center;
+}
+
+.vue-title {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.vue-pagination-ad {
+  text-align: center;
+}
+#test {
+  width: 95%;
+  margin: 0 auto;
+}
         </style>
     </head>
     <body style="overflow-x: hidden;">
@@ -41,8 +57,8 @@ input[type=number]::-webkit-outer-spin-button {
                         <div class="dropdown" style="margin-left: 2%; margin-top: 0.4%;">
                             <a style="font-size: x-large;">Sales</a>
                             <div class="dropdown-content">
-                                <a href="#" @click="route = 'sale'">Sale</a>
-                                <a href="#" @click="route = 'invoices'">Invoices</a>
+                                <a href="#" @click="getInvoicer()">Sale</a>
+                                <a href="#" @click="getInvoices()">Invoices</a>
                             </div>
                         </div>
                         <div class="dropdown" style="margin-left: 2%;">
@@ -56,11 +72,195 @@ input[type=number]::-webkit-outer-spin-button {
                     </div>
 
                     <div class="content" style="margin-top: 0.7%;">
-                        <div class="m-b-md" style="font-size: 65px;" v-if="route === 'sale'">
-                            Sale
+                        <div v-if="route === 'sale' || route === 'invoices'">
                             
-                            <invoicer inline-template>
-                                <div style="font-size: 18px;">
+                            <invoicer ref="invoicer" inline-template>
+
+                                <div style="width: 80%; margin: 0 auto;" v-if="$parent.route === 'invoices'">
+                                    <span style="font-size: 65px;">Invoices</span>
+                                    <!-- <div id="test" class="row" style=""> -->
+                                        <!-- <div class="col-md-12"> -->
+                                            <v-client-table :data="invoices" :columns="invoice_columns" :options="table_options">
+                                                <a slot="view" slot-scope="props" class="fa fa-expand-arrows-alt" @click="editInvoice(props.row.id)" style="cursor: pointer;"></a>
+                                            </v-client-table>
+                                            <modal name="showInvoice" height="auto" width="75%" style="font-size: 18px; text-align: center;">
+                                                
+                                                <table class="table">
+                                                    <thead class="thead-dark">
+                                                        <tr>
+                                                            <th scope="col">Sr No</th>
+                                                            <th scope="col">Product</th>
+                                                            <th scope="col">Tax</th>
+                                                            <th scope="col">Price Incl. Tax</th>
+                                                            <th scope="col">Qty</th>
+                                                            <th scope="col">Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(item, index) in billItems">
+                                                            <th scope="row">@{{ index + 1 }}</th>
+                                                            <td>@{{ item.name }}</td>
+                                                            <td>@{{ item.tax }}%</td>
+                                                            <td>@{{ item.mrp }}</td>
+                                                            <td>@{{ item.qty }}</td>
+                                                            <td>@{{ item.mrp * item.qty }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">
+                                                                <span v-if="discPercent">
+                                                                    <span>Disc % :&nbsp;&nbsp;</span>
+                                                                    <span>@{{ discPercent }}</span>
+                                                                </span>
+                                                            </th>
+                                                            <th scope="col">
+                                                                <span v-if="discAmt">
+                                                                    <span>Disc Amt:&nbsp;&nbsp;</span>
+                                                                    <span>@{{ discAmt }}</span>
+                                                                </span>
+                                                            </th>
+                                                            <th scope="col">
+                                                                <span>
+                                                                    <span>Payment Mode:&nbsp;&nbsp;</span>
+                                                                    <span>@{{ paymentMode }}</span>
+                                                                </span>
+                                                            </th>
+                                                            <th scope="col" v-if="paymentMode == 'Patanjali Card'">
+                                                                <span>
+                                                                    <span>Recharge Amt:&nbsp;&nbsp;</span>
+                                                                    <span>@{{ rechargeAmt }}</span>
+                                                                </span>
+                                                            </th>
+                                                            <th scope="col" style="width: 30%;">
+                                                                <span>
+                                                                    <span>Grand Total:&nbsp;&nbsp;</span>
+                                                                    <span>@{{ grand_total }}</span>
+                                                                </span>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                </table>
+                                                <div class="row" style="font-size: x-large; color: white; text-align: center; cursor: pointer;">
+                                                    <div @click="$modal.hide('showInvoice')" class="col-md-6" style="background-color: indianred">
+                                                        Cancel
+                                                    </div>
+                                                    <div @click="printBill('printMe')" class="col-md-6" style="background-color: darkseagreen">
+                                                        Print
+                                                    </div>
+                                                </div>
+
+                                                <div id="printMe" hidden>
+                                                    <div class="row" style="font-size: 18px; font-weight: bold; margin-top: 2%; margin-bottom: 1%">
+                                                        <div class="col-md-1"></div>
+                                                        <div class="col-md-2"><br>
+                                                            <span v-if="invoiceType == 'Return'">Return</span>&nbsp;Invoice No. &nbsp; @{{ invoice_id }}
+                                                        </div>
+                                                        <div class="col-md-6" style="text-align: center;">
+                                                            Patanjali Aarogya Kendra <br>
+                                                            Sai Ram Store,<br>
+                                                            Bhim Chowk, Jaripatka, Nagpur-440014 <br>
+                                                            9595034566
+                                                        </div>      
+                                                        <div class="col-md-3"><br>
+                                                            @{{ invoice_date }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="font-size: 22px;">
+                                                        <div class="col-md-12">
+                                                            <table class="table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">Sr. No.</th>
+                                                                        <th scope="col">Product</th>
+                                                                        <th scope="col">Tax</th>
+                                                                        <th scope="col">Price Incl. Tax</th>
+                                                                        <th scope="col">Qty</th>
+                                                                        <th scope="col">Amount</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody style="font-size: 22px;">
+                                                                    <tr v-for="(item, index) in billItems">
+                                                                        <th scope="row">@{{ index + 1 }}</th>
+                                                                        <th scope="row">@{{ item.name }}</th>
+                                                                        <th scope="row">@{{ item.tax }}%</th>
+                                                                        <th scope="row">@{{ item.mrp }}</th>
+                                                                        <th scope="row">@{{ item.qty }}</th>
+                                                                        <th scope="row">@{{ item.mrp * item.qty }}</th>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <table class="table" style="font-size: 22px;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">
+                                                                        </th>
+                                                                        <th scope="col"></th>
+                                                                        <th scope="col">
+                                                                            <span v-if="discPercent">
+                                                                                <span>Disc %:&nbsp;&nbsp;</span>
+                                                                                <span>@{{ discPercent }}</span>
+                                                                            </span>
+                                                                        </th>
+                                                                        <th scope="col">
+                                                                            <span v-if="discAmt">
+                                                                                <span>Disc Amt:&nbsp;&nbsp;</span>
+                                                                                <span>@{{ discAmt }}</span>
+                                                                            </span>
+                                                                        </th>
+                                                                        <th scope="col" style="width: 30%;">
+                                                                            <span>Grand Total:&nbsp;&nbsp;</span>
+                                                                            <span style="font-size: 36px;">@{{ grand_total }}</span>
+                                                                        </th>
+                                                                    </tr>
+                                                                </thead>
+                                                            </table>                                                    
+                                                        </div>
+                                                    </div>
+                                                    <h4 style="text-align: center;">It was great to see you<br>!! Do visit again !!</h4>
+                                                    
+                                                </div>      
+
+
+                                            </modal>
+                                            <!-- <table class="table">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th scope="col">Invoice No.</th>
+                                                        <th scope="col">Date</th>
+                                                        <th scope="col">Disc Amt</th>
+                                                        <th scope="col">Disc %</th>
+                                                        <th scope="col">No of Items</th>
+                                                        <th scope="col">Total</th>
+                                                        <th scope="col">Grand Total</th>
+                                                        <th scope="col">Payment Mode</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(inv, index) in invoices">
+                                                        <th scope="row">@{{ inv.id }}</th>
+                                                        <td>@{{ inv.created_at }}</td>
+                                                        <td>@{{ inv.discount }}%</td>
+                                                        <td>@{{ inv.discount_percent }}</td>
+                                                        <td>@{{ inv.products_count }}</td>
+                                                        <td>@{{ inv.payment_mode }}</td>
+                                                        <td>@{{ inv.total }}</td>
+                                                        <td>@{{ inv.grand_total }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table> -->
+                                        <!-- </div> -->
+                                    <!-- </div> -->
+                                </div>
+
+
+                                <div style="font-size: 18px;" v-else="">
 
                                     <div class="row" style="margin-top: 0.8%; margin-bottom: 3%; margin-left: 8%;">
                                         <div class="col-md-2">
@@ -79,13 +279,13 @@ input[type=number]::-webkit-outer-spin-button {
                                         <!-- <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button> -->
                                     </div>
 
-                                    <div hidden="true">
+                                    <div hidden>
                                         <!-- SOURCE -->
-                                        <div id="printMe">
+                                        <div id="printMeNew">
                                             <div class="row" style="font-size: 18px; font-weight: bold; margin-top: 2%; margin-bottom: 1%">
                                                 <div class="col-md-1"></div>
                                                 <div class="col-md-2"><br>
-                                                    Invoice No. &nbsp; 1
+                                                    <span v-if="invoiceType == 'Return'">Return</span>&nbsp;Invoice No. &nbsp; @{{ invoice_id }}
                                                 </div>
                                                 <div class="col-md-6" style="text-align: center;">
                                                     Patanjali Aarogya Kendra <br>
@@ -94,31 +294,8 @@ input[type=number]::-webkit-outer-spin-button {
                                                     9595034566
                                                 </div>      
                                                 <div class="col-md-3"><br>
-                                                    10/10/2019 01:18:05 am
+                                                    @{{ invoice_date }}
                                                 </div>
-                                                <!-- <table class="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>
-                                                                Invoice No. &nbsp; 1
-                                                            </th>
-                                                            <th></th>
-                                                            <th style="text-align: center;">
-                                                                Patanjali Aarogya Kendra <br>
-                                                                Sai Ram Store,<br>
-                                                                Bhim Chowk, Jaripatka, Nagpur-440014 <br>
-                                                                9595034566
-                                                            </th>
-                                                            <th>
-                                                                
-                                                            </th>
-                                                            <th>
-                                                               10/10/2019 01:18:05 am
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                </table> -->
-
                                             </div>
                                             <div class="row" style="font-size: 22px;">
                                                 <div class="col-md-12">
@@ -222,7 +399,17 @@ input[type=number]::-webkit-outer-spin-button {
                                                             <option>Patanjali Card</option>
                                                         </select>
                                                     </th>
-                                                    <th scope="col"></th>
+                                                    <th scope="col" v-if="paymentMode == 'Patanjali Card'">
+                                                        <span>Recharge Amt:&nbsp;&nbsp;</span>
+                                                        <input v-model="rechargeAmt" type="number" style="width: 14%; text-align: center;">
+                                                    </th>
+                                                    <th scope="col">
+                                                        <select v-model="invoiceType">
+                                                            <option disabled value="">Please select one</option>
+                                                            <option>Sale</option>
+                                                            <option>Return</option>
+                                                        </select>
+                                                    </th>
                                                     <th>
                                                         <span>Disc %:&nbsp;&nbsp;</span>
                                                         <input @keyup="calDiscAmt" v-model="discPercent" type="number" style="width: 14%; text-align: center;">
@@ -253,39 +440,7 @@ input[type=number]::-webkit-outer-spin-button {
                                 </div>
                             </invoicer>
                         </div>
-                        <div class="m-b-md" v-else-if="route === 'invoices'">
-                            <span style="font-size: 65px;">Invoices</span>
-                            <div id="billing-table" class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
-                                <div class="col-md-12">
-                                    <table class="table">
-                                        <thead class="thead-dark">
-                                            <tr>
-                                                <th scope="col">Invoice No.</th>
-                                                <th scope="col">Date</th>
-                                                <th scope="col">Disc Amt</th>
-                                                <th scope="col">Disc %</th>
-                                                <th scope="col">No of Items</th>
-                                                <th scope="col">Payment Mode</th>
-                                                <th scope="col">Total</th>
-                                                <th scope="col">Grand Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="(inv, index) in invoices">
-                                                <th scope="row">@{{ inv.id }}</th>
-                                                <td>@{{ inv.created_at }}</td>
-                                                <td>@{{ inv.discount }}%</td>
-                                                <td>@{{ inv.discount_percent }}</td>
-                                                <td>@{{ inv.products_count }}</td>
-                                                <td>@{{ inv.payment_mode }}</td>
-                                                <td>@{{ inv.total }}</td>
-                                                <td>@{{ inv.grand_total }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                        
                         <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'stockList'">
                             Stock List
                         </div>

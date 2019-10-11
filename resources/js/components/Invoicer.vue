@@ -11,13 +11,43 @@
                 },
                 itemOptions: [],
                 newItem: {},
+                rechargeAmt: '',
                 billItems: [],
                 selectFlag: false,
                 makeRequest: true,
                 magic_flag: true,
                 discAmt: null,
                 discPercent: null,
-                paymentMode: "Cash"
+                paymentMode: "Cash",
+                getInvFlag: true,
+                invoices: [],
+                grand_total: 0,
+                unsavedInvoices: [],
+                invoice_date: '',
+                invoice_id: 10,
+                invoiceType: 'Sale',
+                invoice_columns: [
+                    'id',
+                    'created_at',
+                    'products_count',
+                    'total',
+                    'discount',
+                    'grand_total',
+                    'payment_mode',
+                    'type',
+                    'view'
+                ],
+                table_options:{
+                    sortable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
+                    filterable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
+                    headings: {
+                        id: 'Invoice Id',
+                        created_at: 'Date',
+                        products_count: 'No of Items',
+                        type: 'Invoice Type'
+                    },
+                },
+
             }
         },
         
@@ -51,6 +81,40 @@
                     });
                     
                     return total;
+                }
+
+                return 0;
+            },
+
+            returnSub() {
+                if (this.billItems.length > 0) {
+                    let total = 0;
+                    _.forEach(this.billItems, (item, key) => {
+                        total += parseFloat(item.mrp) * parseInt(item.return_qty);
+                    });
+                    
+                    if (isNaN(total)) {
+                        return 0;
+                    }
+
+                    return total;
+                }
+
+                return 0;
+            },
+
+            returnTotal() {
+                if (this.billItems.length > 0) {
+                    let amt = this.returnSub;
+                    if (this.discPercent) {
+                        amt = amt - (amt * (this.discPercent/100));
+                    }
+
+                    if (isNaN(amt)) {
+                        return 0;
+                    }
+
+                    return amt;
                 }
 
                 return 0;
@@ -216,9 +280,22 @@
             },
 
             qtyChanged(val, billItem) {
-                if (val >= billItem.qty_avl) {
+                if (val > billItem.qty_avl) {
                     this.notify("Quantity can't be more than " + billItem.qty_avl);
                     billItem.qty = billItem.qty_avl;
+                    return;
+                }
+                // if (val == 0) {
+                //     this.notify("Quantity can't be 0. Remove item from the bill instead");
+                //     billItem.qty = 1;
+                //     return;
+                // }
+            },
+
+            retQtyChanged(val, billItem) {
+                if (val > billItem.qty) {
+                    this.notify(" Return Quantity can't be more than " + billItem.qty);
+                    billItem.return_qty = billItem.qty;
                     return;
                 }
                 // if (val == 0) {
@@ -319,22 +396,19 @@
             },
 
             saveAndPrint() {
-                if (this.billItems.length == 0) {
-                    this.notify("There is nothing to save here!");
-                    return;
-                }
                 this.saveBill(true);
             },
 
             saveAndClose() {
-                if (this.billItems.length == 0) {
-                    this.notify("There is nothing to save here!");
-                    return;
-                }
                 this.saveBill();
             },
 
             saveBill(printBill = false) {
+
+                if (!this.validateData()) {
+                    return;
+                }
+
                 let data = {};
                 data.billItems = this.billItems;
                 data.billTotal = this.billTotal;
@@ -342,8 +416,13 @@
                 data.discAmt = this.discAmt;
                 data.discPercent = this.discPercent;
                 data.paymentMode = this.paymentMode;
+                data.rechargeAmt = this.rechargeAmt;
+                data.type = this.invoiceType;
                 axios.post("api/invoice", data)
                 .then(response => {
+                    let invoice = response.data;
+                    this.invoice_id = invoice.invoice.id;
+                    this.invoice_date = invoice.invoice.created_at;
                     Vue.notify({
                         group: 'foo',
                         title: 'Yay!',
@@ -352,18 +431,27 @@
                         duration: 3000,
                         speed: 1000
                     });
+
                     if (printBill) {
-                        this.printBill();
+                        setTimeout(() => {
+                            this.printBill('printMeNew');
+                        }, 250);
+                        
                     }
-                    this.resetSearch();
-                    this.itemOptions = [];
-                    this.newItem = {};
-                    this.billItems = [];
-                    this.selectFlag = false;
-                    this.makeRequest = true;
-                    this.discAmt = null;
-                    this.discPercent = null;
-                    this.paymentMode = "Cash";
+
+                    setTimeout(() => {
+                        this.resetSearch();
+                        this.invoiceType = 'Sale';
+                        this.itemOptions = [];
+                        this.newItem = {};
+                        this.billItems = [];
+                        this.selectFlag = false;
+                        this.makeRequest = true;
+                        this.discAmt = null;
+                        this.discPercent = null;
+                        this.paymentMode = "Cash";
+                    }, 500);
+                    
                 }).catch(error => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data.errors || {};
@@ -373,10 +461,20 @@
 
             getInvoices() {
                 this.$parent.route = "invoices";
+                if (this.getInvFlag) {
+                    axios.get("api/invoice")
+                    .then(response => {
+                        this.invoices = response.data;
+                    }).catch(error => {
+                        if (error.response.status === 422) {
+                            this.errors = error.response.data.errors || {};
+                        }
+                    });
+               }
             },
 
-            printBill() {
-                this.Popup($(document.getElementById("printMe")).html());
+            printBill(id) {
+                this.Popup($(document.getElementById(id)).html());
             },
 
             Popup(data) {
@@ -399,6 +497,53 @@
                 // Pass the element id here
                 // this.$htmlToPaper('printMe');
                 
+            },
+
+            editInvoice(id) {
+                this.$modal.show("showInvoice");
+                axios.get(`api/invoice/${id}`)
+                .then(response => {
+                    let invoice =  response.data;
+                    this.billItems = invoice.invoice_items;
+                    this.discPercent = invoice.discount_percent;
+                    this.discAmt = invoice.discount;
+                    this.grand_total = invoice.grand_total;
+                    this.invoice_id = invoice.id;
+                    this.invoice_date = invoice.created_at;   
+                    this.invoiceType = invoice.type;   
+                    this.paymentMode = invoice.payment_mode;
+                    this.rechargeAmt = invoice.recharge_amount;             
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                      this.errors = error.response.data.errors || {};
+                    }
+                });
+            },
+
+            resetData() {
+                console.log("I got a call");
+                setTimeout(() => {
+                    Object.assign(this.$data, this.$options.data());
+                    console.log("Reset");
+                },2000);
+                
+            },
+
+            validateData() {
+
+                if (this.billItems.length == 0) {
+                    this.notify("There is nothing to save here!");
+                    return false;
+                }
+
+                if (this.paymentMode == 'Patanjali Card') {
+                    if (_.isEmpty(this.rechargeAmt)) {
+                        this.notify("Insert Recharge Amount");
+                        return false;
+                    }
+                }
+
+                return true;
             }
         }
     }

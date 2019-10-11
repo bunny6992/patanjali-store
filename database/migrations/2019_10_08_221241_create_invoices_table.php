@@ -25,6 +25,7 @@ class CreateInvoicesTable extends Migration
             $table->string('type');
             $table->decimal('total_cost', 8, 2)->nullable();
             $table->string('payment_mode');
+            $table->decimal('recharge_amount', 8, 2)->nullable();
             $table->timestamps();
         });
     }

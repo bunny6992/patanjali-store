@@ -17,6 +17,8 @@ window.Swal = require('sweetalert2');
 import Notifications from 'vue-notification';
 Vue.use(Notifications);
 import VueHtmlToPaper from 'vue-html-to-paper';
+import {ServerTable, ClientTable, Event} from 'vue-tables-2';
+import VModal from 'vue-js-modal';
 // window._ = require('vue-notification');
 
 /**
@@ -37,6 +39,8 @@ Vue.component('v-select', vSelect);
 Vue.component('model-select', ModelSelect);
 Vue.component('sweet-alert', Swal);
 Vue.use(VueHtmlToPaper);
+Vue.use(ClientTable);
+Vue.use(VModal);
 
 
 

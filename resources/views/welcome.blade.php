@@ -411,10 +411,14 @@ input[type=number]::-webkit-outer-spin-button {
                                                         </select>
                                                     </th>
                                                     <th>
+                                                        <i @click="showDiscount = 'true'" class="fas fa-chevron-left" v-if="showDiscount == 'false'"></i>
+                                                        <i @click="showDiscount = 'false'" class="fas fa-chevron-right" v-else></i>
+                                                    </th>
+                                                    <th v-if="showDiscount == 'true'">
                                                         <span>Disc %:&nbsp;&nbsp;</span>
                                                         <input @keyup="calDiscAmt" v-model="discPercent" type="number" style="width: 14%; text-align: center;">
                                                     </th>
-                                                    <th scope="col">
+                                                    <th scope="col" v-if="showDiscount == 'true'">
                                                         <span>Disc Amt:&nbsp;&nbsp;</span>
                                                         <input @keyup="calDiscPercent" v-model="discAmt" type="number" style="width: 14%; text-align: center;">
                                                     </th>

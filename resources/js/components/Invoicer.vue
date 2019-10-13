@@ -18,6 +18,7 @@
                 magic_flag: true,
                 discAmt: null,
                 discPercent: null,
+                showDiscount: false,
                 paymentMode: "Cash",
                 getInvFlag: true,
                 invoices: [],

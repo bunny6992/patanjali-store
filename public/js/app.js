@@ -2250,6 +2250,7 @@ __webpack_require__.r(__webpack_exports__);
       magic_flag: true,
       discAmt: null,
       discPercent: null,
+      showDiscount: false,
       paymentMode: "Cash",
       getInvFlag: true,
       invoices: [],

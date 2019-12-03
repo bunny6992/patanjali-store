@@ -2241,6 +2241,7 @@ __webpack_require__.r(__webpack_exports__);
         value: '',
         text: ''
       },
+      allItems: [],
       itemOptions: [],
       newItem: {},
       rechargeAmt: '',
@@ -2273,6 +2274,7 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
+    this.getInventory();
     this.focusOnSearch();
   },
   computed: {
@@ -2344,6 +2346,17 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
+    getInventory: function getInventory() {
+      var _this = this;
+
+      axios.get("api/get-all-items").then(function (response) {
+        _this.allItems = response.data;
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this.errors = error.response.data.errors || {};
+        }
+      });
+    },
     addItem: function addItem() {//console.log("Oh Yeah!!");
       // if (this.timer) {
       //     clearTimeout(this.timer);
@@ -2356,7 +2369,7 @@ __webpack_require__.r(__webpack_exports__);
       // }, 1000);
     },
     onSearch: function onSearch(search, loading) {
-      var _this = this;
+      var _this2 = this;
 
       //loading(true);
       //this.search(loading, search, this);
@@ -2369,16 +2382,16 @@ __webpack_require__.r(__webpack_exports__);
         var test = search;
 
         if (search.length == 0) {
-          test = _this.$refs.test._data._value;
+          test = _this2.$refs.test._data._value;
         }
 
         if (test.length > 3) {
-          _this.search(loading, search, _this);
+          _this2.search(loading, search, _this2);
         }
       }, 750);
     },
     askForQty: function askForQty() {
-      var _this2 = this;
+      var _this3 = this;
 
       Swal.fire({
         title: 'Kitne Chahiye??',
@@ -2389,14 +2402,14 @@ __webpack_require__.r(__webpack_exports__);
         inputPlaceholder: 'How Many?'
       }).then(function (text) {
         if (!isNaN(text.value)) {
-          _this2.newItem.qty = text.value;
+          _this3.newItem.qty = text.value;
         }
 
-        _this2.focusOnSearch();
+        _this3.focusOnSearch();
       });
     },
     search: function search(loading, _search, vm) {
-      var _this3 = this;
+      var _this4 = this;
 
       // console.log(search);
       // console.log(this.$refs.test._data._value);
@@ -2410,78 +2423,76 @@ __webpack_require__.r(__webpack_exports__);
         query = this.$refs.test._data._value;
       }
 
-      axios.get("api/get-items/".concat(query)).then(function (response) {
-        vm.options = [];
-        _this3.selectFlag = false;
-        _this3.itemOptions = [];
+      var products = [];
 
-        if (response.data == 'No Products Found.') {
-          vm.options.push("I got nothing here Man!");
-          _this3.selectFlag = true;
-          Vue.notify({
-            group: 'foo',
-            title: 'What you  doing bro!',
-            text: 'I got nothing here!',
-            type: 'error',
-            duration: 3000,
-            speed: 1000
-          });
+      _.forEach(this.allItems, function (item) {
+        var tempName = item.name.toLowerCase();
+        tempName += item.barcode;
 
-          _this3.focusOnSearch();
-
-          return;
-        }
-
-        if (response.data.length > 1) {
-          _.forEach(response.data, function (value, key) {
-            vm.options.push(value.name + " MRP-" + value.mrp);
-
-            _this3.itemOptions.push({
-              id: value.name + " MRP-" + value.mrp,
-              product_id: value.product_id,
-              batch_id: value.batch_id,
-              name: value.name,
-              mrp: value.mrp,
-              qty_avl: parseInt(value.qty),
-              tax: value.tax
-            });
-          });
-
-          _this3.makeRequest = false;
-          _this3.selectFlag = true;
-        } else {
-          vm.options.push(response.data[0].name + " MRP-" + response.data[0].mrp);
-          _this3.$refs.test._data._value = response.data[0].name + " MRP-" + response.data[0].mrp;
-          _this3.newItem = {
-            id: response.data[0].name + " MRP-" + response.data[0].mrp,
-            name: response.data[0].name,
-            mrp: response.data[0].mrp,
-            tax: response.data[0].tax,
-            qty_avl: parseInt(response.data[0].qty),
-            product_id: response.data[0].product_id,
-            batch_id: response.data[0].batch_id,
-            qty: 1
-          }; // this.askForQty();
-
-          _this3.addToBill();
-
-          _this3.makeRequest = true;
-
-          _this3.resetSearch();
-        }
-      })["catch"](function (error) {
-        if (error.response.status === 422) {
-          _this3.errors = error.response.data.errors || {};
+        if (tempName.search(query.toLowerCase()) > 0) {
+          products.push(item);
         }
       });
+
+      vm.options = [];
+      this.selectFlag = false;
+      this.itemOptions = [];
+
+      if (products.length == 0) {
+        vm.options.push("I got nothing here Man!");
+        this.selectFlag = true;
+        Vue.notify({
+          group: 'foo',
+          title: 'What you  doing bro!',
+          text: 'I got nothing here!',
+          type: 'error',
+          duration: 3000,
+          speed: 1000
+        });
+        this.focusOnSearch();
+        return;
+      }
+
+      if (products.length > 1) {
+        _.forEach(products, function (value, key) {
+          vm.options.push(value.name + " MRP-" + value.mrp);
+
+          _this4.itemOptions.push({
+            id: value.name + " MRP-" + value.mrp,
+            product_id: value.product_id,
+            batch_id: value.batch_id,
+            name: value.name,
+            mrp: value.mrp,
+            qty_avl: parseInt(value.qty),
+            tax: value.tax
+          });
+        });
+
+        this.makeRequest = false;
+        this.selectFlag = true;
+      } else {
+        vm.options.push(products[0].name + " MRP-" + products[0].mrp);
+        this.$refs.test._data._value = products[0].name + " MRP-" + products[0].mrp;
+        this.newItem = {
+          id: products[0].name + " MRP-" + products[0].mrp,
+          name: products[0].name,
+          mrp: products[0].mrp,
+          tax: products[0].tax,
+          qty_avl: parseInt(products[0].qty),
+          product_id: products[0].product_id,
+          batch_id: products[0].batch_id,
+          qty: 1
+        }; // this.askForQty();
+
+        this.addToBill();
+        this.makeRequest = true;
+        this.resetSearch();
+      }
     },
     addToBill: function addToBill() {
-      var _this4 = this;
-
-      console.log(this.checkIfAdded());
+      var _this5 = this;
 
       if (this.checkIfAdded()) {
-        this.notify("Product already added. Update Quantity instead.");
         return;
       }
 
@@ -2493,7 +2504,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       this.timer3 = setTimeout(function () {
-        var container = _this4.$el.querySelector("#billing-table");
+        var container = _this5.$el.querySelector("#billing-table");
 
         container.scrollTop = container.scrollHeight;
         window.scrollTo({
@@ -2544,7 +2555,7 @@ __webpack_require__.r(__webpack_exports__);
       this.$delete(this.billItems, index);
     },
     changed: function changed() {
-      var _this5 = this;
+      var _this6 = this;
 
       if (this.selectFlag) {
         if (this.timer2) {
@@ -2553,13 +2564,13 @@ __webpack_require__.r(__webpack_exports__);
         }
 
         this.timer2 = setTimeout(function () {
-          var item = _.find(_this5.itemOptions, {
-            'id': _this5.$refs.test._data._value
+          var item = _.find(_this6.itemOptions, {
+            'id': _this6.$refs.test._data._value
           });
 
           if (item) {
             console.log(item);
-            _this5.newItem = {
+            _this6.newItem = {
               id: item.name + " MRP-" + item.mrp,
               name: item.name,
               mrp: item.mrp,
@@ -2570,11 +2581,11 @@ __webpack_require__.r(__webpack_exports__);
               qty: 1
             }; // this.askForQty();
 
-            _this5.addToBill();
+            _this6.addToBill();
 
-            _this5.resetSearch();
+            _this6.resetSearch();
 
-            _this5.focusOnSearch();
+            _this6.focusOnSearch();
           }
         }, 200);
       }
@@ -2594,10 +2605,26 @@ __webpack_require__.r(__webpack_exports__);
       this.options = [];
     },
     checkIfAdded: function checkIfAdded() {
-      if (_.find(this.billItems, {
+      var item = _.find(this.billItems, {
         'product_id': this.newItem.product_id,
         'batch_id': this.newItem.batch_id
-      })) {
+      });
+
+      if (item) {
+        if (item.qty_avl > item.qty) {
+          item.qty += 1;
+          Vue.notify({
+            group: 'foo',
+            title: 'Quantity Updated',
+            text: "Increased the quantity!",
+            type: 'success',
+            duration: 2000,
+            speed: 1000
+          });
+        } else {
+          this.notify("That's all the quantity we have Man!");
+        }
+
         return true;
       }
 
@@ -2637,7 +2664,7 @@ __webpack_require__.r(__webpack_exports__);
       this.saveBill();
     },
     saveBill: function saveBill() {
-      var _this6 = this;
+      var _this7 = this;
 
       var printBill = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
@@ -2656,8 +2683,8 @@ __webpack_require__.r(__webpack_exports__);
       data.type = this.invoiceType;
       axios.post("api/invoice", data).then(function (response) {
         var invoice = response.data;
-        _this6.invoice_id = invoice.invoice.id;
-        _this6.invoice_date = invoice.invoice.created_at;
+        _this7.invoice_id = invoice.invoice.id;
+        _this7.invoice_date = invoice.invoice.created_at;
         Vue.notify({
           group: 'foo',
           title: 'Yay!',
@@ -2669,40 +2696,42 @@ __webpack_require__.r(__webpack_exports__);
 
         if (printBill) {
           setTimeout(function () {
-            _this6.printBill('printMeNew');
+            _this7.printBill('printMeNew');
           }, 250);
         }
 
-        setTimeout(function () {
-          _this6.resetSearch();
+        _this7.getInventory();
 
-          _this6.invoiceType = 'Sale';
-          _this6.itemOptions = [];
-          _this6.newItem = {};
-          _this6.billItems = [];
-          _this6.selectFlag = false;
-          _this6.makeRequest = true;
-          _this6.discAmt = null;
-          _this6.discPercent = null;
-          _this6.paymentMode = "Cash";
+        setTimeout(function () {
+          _this7.resetSearch();
+
+          _this7.invoiceType = 'Sale';
+          _this7.itemOptions = [];
+          _this7.newItem = {};
+          _this7.billItems = [];
+          _this7.selectFlag = false;
+          _this7.makeRequest = true;
+          _this7.discAmt = null;
+          _this7.discPercent = null;
+          _this7.paymentMode = "Cash";
         }, 500);
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this6.errors = error.response.data.errors || {};
+          _this7.errors = error.response.data.errors || {};
         }
       });
     },
     getInvoices: function getInvoices() {
-      var _this7 = this;
+      var _this8 = this;
 
       this.$parent.route = "invoices";
 
       if (this.getInvFlag) {
         axios.get("api/invoice").then(function (response) {
-          _this7.invoices = response.data;
+          _this8.invoices = response.data;
         })["catch"](function (error) {
           if (error.response.status === 422) {
-            _this7.errors = error.response.data.errors || {};
+            _this8.errors = error.response.data.errors || {};
           }
         });
       }
@@ -2729,32 +2758,32 @@ __webpack_require__.r(__webpack_exports__);
       // this.$htmlToPaper('printMe');
     },
     editInvoice: function editInvoice(id) {
-      var _this8 = this;
+      var _this9 = this;
 
       this.$modal.show("showInvoice");
       axios.get("api/invoice/".concat(id)).then(function (response) {
         var invoice = response.data;
-        _this8.billItems = invoice.invoice_items;
-        _this8.discPercent = invoice.discount_percent;
-        _this8.discAmt = invoice.discount;
-        _this8.grand_total = invoice.grand_total;
-        _this8.invoice_id = invoice.id;
-        _this8.invoice_date = invoice.created_at;
-        _this8.invoiceType = invoice.type;
-        _this8.paymentMode = invoice.payment_mode;
-        _this8.rechargeAmt = invoice.recharge_amount;
+        _this9.billItems = invoice.invoice_items;
+        _this9.discPercent = invoice.discount_percent;
+        _this9.discAmt = invoice.discount;
+        _this9.grand_total = invoice.grand_total;
+        _this9.invoice_id = invoice.id;
+        _this9.invoice_date = invoice.created_at;
+        _this9.invoiceType = invoice.type;
+        _this9.paymentMode = invoice.payment_mode;
+        _this9.rechargeAmt = invoice.recharge_amount;
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this8.errors = error.response.data.errors || {};
+          _this9.errors = error.response.data.errors || {};
         }
       });
     },
     resetData: function resetData() {
-      var _this9 = this;
+      var _this10 = this;
 
       console.log("I got a call");
       setTimeout(function () {
-        Object.assign(_this9.$data, _this9.$options.data());
+        Object.assign(_this10.$data, _this10.$options.data());
         console.log("Reset");
       }, 2000);
     },

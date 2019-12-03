@@ -69,6 +69,14 @@ class InvoiceController extends Controller
             $invoiceItem->row_total = $item['qty'] * $batch->mrp;
             $invoiceItem->type = 'sale';
             $invoiceItem->save();
+
+            if ($batch->qty > $item['qty']) {
+                $batch->qty -= $item['qty'];
+            } else {
+                $batch->qty = 0;
+            }
+            $batch->save();
+            
             $totalCost += $item['qty'] * $batch->avg_cost;
         }
         $invoice->total_cost = $totalCost;

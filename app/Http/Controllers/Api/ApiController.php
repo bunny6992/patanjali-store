@@ -43,4 +43,35 @@ class ApiController extends Controller
 
         return $return;
     }
+
+    public function getAllItems()
+    {
+        $products = Product::all();
+
+        if (count($products) == 0) {
+            return "No Products Found.";
+        }
+
+        $return = [];
+        $sortedProducts = $products->sortBy('name');
+        foreach ($sortedProducts as $id => $product) {
+            foreach ($product->batches as $batchId => $batch) {
+                $returnProduct = [
+                    'product_id' => $product->id,
+                    'batch_id' => $batch->id,
+                    'name' => $product->name,
+                    'tax' => $product->tax,
+                    'mrp' => $batch->mrp,
+                    'qty' => $batch->qty,
+                    'avg_cost' => $batch->avg_cost,
+                    'barcode' => $product->barcode
+                ];
+                if ($batch->qty > 0) {
+                    array_push($return, $returnProduct);
+                }                
+            }
+        }
+
+        return $return;
+    }
 }

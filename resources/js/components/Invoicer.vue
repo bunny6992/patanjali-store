@@ -9,6 +9,7 @@
                     value: '',
                     text: ''
                 },
+                allItems: [],
                 itemOptions: [],
                 newItem: {},
                 rechargeAmt: '',
@@ -53,6 +54,7 @@
         },
         
         mounted() {
+            this.getInventory();
             this.focusOnSearch();
         },
 
@@ -123,6 +125,17 @@
         },
 
         methods: {
+            getInventory() {
+                axios.get(`api/get-all-items`)
+                .then(response => {
+                    this.allItems = response.data;                
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                      this.errors = error.response.data.errors || {};
+                    }
+                });
+            },
+
             addItem() {
                 //console.log("Oh Yeah!!");
                 // if (this.timer) {
@@ -183,71 +196,71 @@
                 if (search.length == 0) {
                     query = this.$refs.test._data._value;
                 }
-                axios.get(`api/get-items/${query}`)
-                .then(response => {
-                    vm.options = [];
-                    this.selectFlag = false;
-                    this.itemOptions = [];
-                    if (response.data == 'No Products Found.') {
-                        vm.options.push("I got nothing here Man!");
-                        this.selectFlag = true;
-                        Vue.notify({
-                            group: 'foo',
-                            title: 'What you  doing bro!',
-                            text: 'I got nothing here!',
-                            type: 'error',
-                            duration: 3000,
-                            speed: 1000
-                        });
-                        this.focusOnSearch();
-                        return;
-                    }
 
-                    if (response.data.length > 1) {
-                        _.forEach(response.data, (value, key) => {
-                            vm.options.push(value.name + " MRP-" + value.mrp);
-                            this.itemOptions.push({
-                                id: value.name + " MRP-" + value.mrp,
-                                product_id: value.product_id,
-                                batch_id: value.batch_id,
-                                name: value.name,
-                                mrp: value.mrp,
-                                qty_avl: parseInt(value.qty),
-                                tax: value.tax,
-                            });
-                        });
-                        this.makeRequest = false;
-                        this.selectFlag = true;
-                    } else {
-                        vm.options.push(response.data[0].name + " MRP-" + response.data[0].mrp);
-                        this.$refs.test._data._value = response.data[0].name + " MRP-" + response.data[0].mrp;
-                        this.newItem = {
-                            id: response.data[0].name + " MRP-" + response.data[0].mrp,
-                            name: response.data[0].name,
-                            mrp: response.data[0].mrp,
-                            tax: response.data[0].tax,
-                            qty_avl: parseInt(response.data[0].qty),
-                            product_id: response.data[0].product_id,
-                            batch_id: response.data[0].batch_id,
-                            qty: 1,
-                        };
-                        // this.askForQty();
-                        this.addToBill();
-                        this.makeRequest = true;
-                        this.resetSearch();
-                    }
-                    
-                }).catch(error => {
-                    if (error.response.status === 422) {
-                      this.errors = error.response.data.errors || {};
+                let products = [];
+                _.forEach(this.allItems, (item) => {
+                    let tempName = item.name.toLowerCase();
+                    tempName += item.barcode;
+                    if (tempName.search(query.toLowerCase()) > 0) {
+                        products.push(item);
                     }
                 });
+
+                vm.options = [];
+                this.selectFlag = false;
+                this.itemOptions = [];
+                if (products.length == 0) {
+                    vm.options.push("I got nothing here Man!");
+                    this.selectFlag = true;
+                    Vue.notify({
+                        group: 'foo',
+                        title: 'What you  doing bro!',
+                        text: 'I got nothing here!',
+                        type: 'error',
+                        duration: 3000,
+                        speed: 1000
+                    });
+                    this.focusOnSearch();
+                    return;
+                }
+
+                if (products.length > 1) {
+                    _.forEach(products, (value, key) => {
+                        vm.options.push(value.name + " MRP-" + value.mrp);
+                        this.itemOptions.push({
+                            id: value.name + " MRP-" + value.mrp,
+                            product_id: value.product_id,
+                            batch_id: value.batch_id,
+                            name: value.name,
+                            mrp: value.mrp,
+                            qty_avl: parseInt(value.qty),
+                            tax: value.tax,
+                        });
+                    });
+                    this.makeRequest = false;
+                    this.selectFlag = true;
+                } else {
+                    vm.options.push(products[0].name + " MRP-" + products[0].mrp);
+                    this.$refs.test._data._value = products[0].name + " MRP-" + products[0].mrp;
+                    this.newItem = {
+                        id: products[0].name + " MRP-" + products[0].mrp,
+                        name: products[0].name,
+                        mrp: products[0].mrp,
+                        tax: products[0].tax,
+                        qty_avl: parseInt(products[0].qty),
+                        product_id: products[0].product_id,
+                        batch_id: products[0].batch_id,
+                        qty: 1,
+                    };
+                    // this.askForQty();
+                    this.addToBill();
+                    this.makeRequest = true;
+                    this.resetSearch();
+                }
             },
 
             addToBill() {
-                console.log(this.checkIfAdded());
                 if (this.checkIfAdded()) {
-                    this.notify("Product already added. Update Quantity instead.");
                     return;
                 }
                 this.billItems.push(this.newItem);
@@ -358,7 +371,22 @@
             },
 
             checkIfAdded() {
-                if(_.find(this.billItems, { 'product_id': this.newItem.product_id, 'batch_id': this.newItem.batch_id })) {
+                let item = _.find(this.billItems, { 'product_id': this.newItem.product_id, 'batch_id': this.newItem.batch_id })
+                if(item) {
+                    if (item.qty_avl > item.qty) {
+                        item.qty += 1;
+                        Vue.notify({
+                            group: 'foo',
+                            title: 'Quantity Updated',
+                            text: "Increased the quantity!",
+                            type: 'success',
+                            duration: 2000,
+                            speed: 1000
+                        });
+                    } else {
+                        this.notify("That's all the quantity we have Man!");
+                    }
+                    
                     return true;
                 }
                 return false;
@@ -440,6 +468,7 @@
                         
                     }
 
+                    this.getInventory();
                     setTimeout(() => {
                         this.resetSearch();
                         this.invoiceType = 'Sale';

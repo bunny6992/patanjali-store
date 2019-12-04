@@ -34,6 +34,73 @@ input[type=number]::-webkit-outer-spin-button {
   width: 95%;
   margin: 0 auto;
 }
+
+/* Switcher Css*/
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 20px;
+  top: 5px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 40%;
+  height: 95%;
+  position: inherit;
+  top: 0px;
+}
+
+/*End of Switcher Css*/
         </style>
     </head>
     <body style="overflow-x: hidden;">
@@ -296,7 +363,14 @@ input[type=number]::-webkit-outer-spin-button {
                             Stock List
                         </div>
                         <div class="m-b-md" style="font-size: 16px;" v-else-if="route === 'updateStock'">
-                            <div class="container">
+                            <div style="text-align: left; margin: 30px;">
+                                <span style="font-weight: bold; font-size: 24px; position: relative; top: 7px;">Bulk Update</span>
+                                <label class="switch">
+                                    <input type="checkbox" v-model="bulkUpdate">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="container" v-if="bulkUpdate">
                                 <div class="card bg-light mt-3">
                                     <div class="card-header">
                                         Hey Sexy, Hope you are having a great day!
@@ -310,6 +384,94 @@ input[type=number]::-webkit-outer-spin-button {
                                         </form>
                                     </div>
                                 </div>
+                            </div>
+                            <div v-else>
+                                
+                                <invoicer ref="stock-updater" inline-template>
+
+                                <div style="font-size: 18px;">
+
+                                    <div class="row" style="margin-top: 0.8%; margin-bottom: 3%; margin-left: 8%;">
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-1">
+                                            Search Here
+                                        </div>
+                                        <div class="col-md-5">
+                                            <v-select autofocus @change.native="changed" ref="test" label="name" taggable :filterable="false" :options="options" @search="onSearch" @keyup.delete.native="myFunction">
+                                                <template slot="no-options">
+                                                   Type what you want or scan if you are feeling lazy..
+                                                </template>
+                                            </v-select>
+                                        </div>
+                                        <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
+                                        <!-- <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button> -->
+                                    </div>
+
+                                    <div id="billing-table" class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
+                                        <div class="col-md-12">
+                                            <table class="table">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th scope="col">Sr. No.</th>
+                                                        <th scope="col">Product</th>
+                                                        <th scope="col">
+                                                            <label class="switch">
+                                                                <input type="checkbox" v-model="applyTax">
+                                                                <span class="slider round"></span>
+                                                            </label>
+                                                            Tax
+                                                        </th>
+                                                        <th scope="col">MRP</th>
+                                                        <th scope="col">Qty Available</th>
+                                                        <th scope="col">Cost Price</th>
+                                                        <th scope="col">Qty</th>
+                                                        <th scope="col">Amount</th>
+                                                        <th scope="col">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(item, index) in billItems">
+                                                        <th scope="row">@{{ index + 1 }}</th>
+                                                        <td>@{{ item.name }}</td>
+                                                        <td>@{{ item.tax }}%</td>
+                                                        <td>@{{ item.mrp }}</td>
+                                                        <td>@{{ item.qty_avl }}</td>
+                                                        <td style="width: 10%;"><input type="number" name="cost-price" style="width: 60%; text-align: center; border-radius: 10%;" v-model="item.cost_price"></td>
+                                                        <td style="width: 10%;"><input type="number" name="qty" v-model="item.qty" style="width: 45%; text-align: center; border-radius: 10%;"></td>
+                                                        <td v-if="applyTax">@{{ getTaxedPrice(item) }}</td>
+                                                        <td v-else>@{{ item.cost_price * item.qty }}</td>   
+                                                        <td><i @click="removeItem(index)" class="fas fa-trash" style="cursor: pointer;"></i>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="width: 100%; position: sticky; bottom: 0;">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">
+                                                        <span>Grand Total:&nbsp;&nbsp;</span>
+                                                        <span v-if="grandTotal > 0">@{{ grandTotal }}</span>
+                                                    </th>
+                                                    <th scope="col"></th>
+                                                </tr>   
+                                                <tr>
+                                                    <td>
+                                                    <span style="cursor: pointer; padding: 7px; background-color: seagreen; color: white;" @click="updateStock()">Update Items</span>
+                                                    </td>
+                                                </tr>  
+                                            </thead>
+                                        </table>
+                                        <notifications group="foo" position="top center" width="50%">
+
+                                        </notifications>                         
+                                    </div>
+                                </div>
+                            </invoicer>
+
                             </div>
                         </div>
                         <!-- Import New Products -->

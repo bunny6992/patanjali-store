@@ -2246,6 +2246,7 @@ __webpack_require__.r(__webpack_exports__);
       newItem: {},
       rechargeAmt: '',
       billItems: [],
+      applyTax: false,
       selectFlag: false,
       makeRequest: true,
       magic_flag: true,
@@ -2478,13 +2479,19 @@ __webpack_require__.r(__webpack_exports__);
           name: products[0].name,
           mrp: products[0].mrp,
           tax: products[0].tax,
+          cost_price: 0,
           qty_avl: parseInt(products[0].qty),
           product_id: products[0].product_id,
           batch_id: products[0].batch_id,
           qty: 1
         }; // this.askForQty();
 
-        this.addToBill();
+        if (this.newItem.qty_avl > 0 || this.$parent.route == 'updateStock') {
+          this.addToBill();
+        } else {
+          this.notify("Currently not in stock.");
+        }
+
         this.makeRequest = true;
         this.resetSearch();
       }
@@ -2796,6 +2803,7 @@ __webpack_require__.r(__webpack_exports__);
       //Object.assign(this.$data, this.$options.data());
 
       this.billItems = [];
+      this.applyTax = false;
       console.log("Reset"); // },2000);
     },
     validateData: function validateData() {
@@ -2812,6 +2820,35 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return true;
+    },
+    updateStock: function updateStock() {
+      var _this11 = this;
+
+      if (this.applyTax) {
+        _.forEach(this.billItems, function (item, key) {
+          item.cost_price = _this11.getTaxedPrice(item);
+        });
+      }
+
+      axios.post("api/update-items", this.billItems).then(function (response) {
+        Vue.notify({
+          group: 'foo',
+          title: 'Items Updated',
+          text: "Updated items successfully!",
+          type: 'success',
+          duration: 2000,
+          speed: 1000
+        });
+
+        _this11.resetData();
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this11.errors = error.response.data.errors || {};
+        }
+      });
+    },
+    getTaxedPrice: function getTaxedPrice(item) {
+      return (item.cost_price * [1 + item.tax / 100]).toFixed(2) * item.qty;
     }
   }
 });
@@ -2831,7 +2868,8 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       route: 'sale',
-      file: ''
+      file: '',
+      bulkUpdate: false
     };
   },
   mounted: function mounted() {

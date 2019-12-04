@@ -66,12 +66,26 @@ class ApiController extends Controller
                     'avg_cost' => $batch->avg_cost,
                     'barcode' => $product->barcode
                 ];
-                if ($batch->qty > 0) {
+                //if ($batch->qty > 0) {
                     array_push($return, $returnProduct);
-                }                
+                //}                
             }
         }
 
         return $return;
+    }
+
+    public function updateItems(Request $request)
+    {
+        $requestData = $request->all();
+        foreach ($requestData as $item) {
+            // $product = Product::find($item['product_id']);
+            $batch = Batch::find($item['batch_id']);
+            $batch['avg_cost'] = (($batch['avg_cost'] * $batch['qty']) + ($item['cost_price'] * $item['qty'])) / ($batch['qty'] + $item['qty']);
+            $batch->qty += $item['qty'];
+            $batch->save();
+        }
+
+        return;
     }
 }

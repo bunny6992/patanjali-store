@@ -14,6 +14,7 @@
                 newItem: {},
                 rechargeAmt: '',
                 billItems: [],
+                applyTax: false,
                 selectFlag: false,
                 makeRequest: true,
                 magic_flag: true,
@@ -248,13 +249,18 @@
                         name: products[0].name,
                         mrp: products[0].mrp,
                         tax: products[0].tax,
+                        cost_price: 0,
                         qty_avl: parseInt(products[0].qty),
                         product_id: products[0].product_id,
                         batch_id: products[0].batch_id,
                         qty: 1,
                     };
                     // this.askForQty();
-                    this.addToBill();
+                    if (this.newItem.qty_avl > 0 || this.$parent.route == 'updateStock') {
+                        this.addToBill();
+                    } else {
+                        this.notify("Currently not in stock.");
+                    }
                     this.makeRequest = true;
                     this.resetSearch();
                 }
@@ -567,6 +573,7 @@
                 // setTimeout(() => {
                     //Object.assign(this.$data, this.$options.data());
                     this.billItems = [];
+                    this.applyTax = false;
                     console.log("Reset");
                 // },2000);
                 
@@ -587,6 +594,37 @@
                 }
 
                 return true;
+            },
+
+            updateStock() {
+
+                if (this.applyTax) {
+                    _.forEach(this.billItems, (item, key) => {
+                        item.cost_price = this.getTaxedPrice(item);
+                    });
+                }
+
+                axios.post("api/update-items", this.billItems)
+                .then(response => {
+                   Vue.notify({
+                        group: 'foo',
+                        title: 'Items Updated',
+                        text: "Updated items successfully!",
+                        type: 'success',
+                        duration: 2000,
+                        speed: 1000
+                    });
+                   this.resetData();
+                    
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                        this.errors = error.response.data.errors || {};
+                    }
+                });
+            },
+
+            getTaxedPrice(item) {
+                return (item.cost_price * [1 + item.tax/100]).toFixed(2) * item.qty;
             }
         }
     }

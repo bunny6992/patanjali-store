@@ -276,11 +276,11 @@ input[type=number]::-webkit-outer-spin-button {
                                                     <th scope="col"></th>
                                                 </tr>
                                                 <tr>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td></td>
                                                     <td><span style="cursor: pointer; padding: 7px; background-color: seagreen; color: white;" @click="saveAndClose()">Save And New</span></td>
+                                                    <td></td>
                                                     <td><span style="cursor: pointer; padding: 7px; background-color: seagreen; color: white;" @click="saveAndPrint()">Save And Print</span></td>
+                                                    <td></td>
+                                                    <td></td>
                                                 </tr>
                                             </thead>
                                         </table>

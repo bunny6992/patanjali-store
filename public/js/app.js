@@ -2792,13 +2792,11 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     resetData: function resetData() {
-      var _this11 = this;
+      console.log("I got a call"); // setTimeout(() => {
+      //Object.assign(this.$data, this.$options.data());
 
-      console.log("I got a call");
-      setTimeout(function () {
-        Object.assign(_this11.$data, _this11.$options.data());
-        console.log("Reset");
-      }, 2000);
+      this.billItems = [];
+      console.log("Reset"); // },2000);
     },
     validateData: function validateData() {
       if (this.billItems.length == 0) {
@@ -2862,14 +2860,15 @@ __webpack_require__.r(__webpack_exports__);
     },
     getInvoices: function getInvoices() {
       if (this.$refs.invoicer) {
-        //this.$refs.invoicer.resetData();
+        this.$refs.invoicer.resetData();
         this.$refs.invoicer.getInvoices();
       }
     },
     getInvoicer: function getInvoicer() {
       this.route = 'sale';
 
-      if (this.$refs.invoicer) {//this.$refs.invoicer.resetData();
+      if (this.$refs.invoicer) {
+        this.$refs.invoicer.resetData();
       }
     }
   }

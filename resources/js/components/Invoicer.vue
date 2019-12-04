@@ -564,10 +564,11 @@
 
             resetData() {
                 console.log("I got a call");
-                setTimeout(() => {
-                    Object.assign(this.$data, this.$options.data());
+                // setTimeout(() => {
+                    //Object.assign(this.$data, this.$options.data());
+                    this.billItems = [];
                     console.log("Reset");
-                },2000);
+                // },2000);
                 
             },
 

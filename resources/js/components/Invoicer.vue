@@ -37,7 +37,8 @@
                     'grand_total',
                     'payment_mode',
                     'type',
-                    'view'
+                    'view',
+                    'print'
                 ],
                 table_options:{
                     sortable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
@@ -462,10 +463,7 @@
                     });
 
                     if (printBill) {
-                        setTimeout(() => {
-                            this.printBill('printMeNew');
-                        }, 250);
-                        
+                        this.printBill(this.invoice_id);
                     }
 
                     this.getInventory();
@@ -504,7 +502,21 @@
             },
 
             printBill(id) {
-                this.Popup($(document.getElementById(id)).html());
+                axios.get(`api/print-invoice/${id}`)
+                    .then(response => {
+                        Vue.notify({
+                            group: 'foo',
+                            title: 'Printed Successfully',
+                            text: "Invoice printed Successfully",
+                            type: 'success',
+                            duration: 2000,
+                            speed: 1000
+                        });
+                    }).catch(error => {
+                        if (error.response.status === 422) {
+                            this.errors = error.response.data.errors || {};
+                        }
+                    });
             },
 
             Popup(data) {

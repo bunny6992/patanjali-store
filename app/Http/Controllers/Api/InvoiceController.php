@@ -8,6 +8,10 @@ use App\Batch;
 use App\Product;
 use App\Invoice;
 use App\InvoiceItem;
+use Mike42\Escpos\PrintConnectors\FilePrintConnector;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+use Mike42\Escpos\Printer;
+use Mike42\Escpos\CapabilityProfile;
 
 class InvoiceController extends Controller
 {
@@ -139,5 +143,145 @@ class InvoiceController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function printInvoice($invoiceId)
+    {
+        $invoice = Invoice::find($invoiceId);
+        try {
+            $total = 0;
+            $totalQty = 0;
+            // Enter the share name for your USB printer here
+            //$connector = "POS-58";
+            $connector = new WindowsPrintConnector("POS-58-Series");
+            //$connector = new WindowsPrintConnector("103.252.169.199");
+            /* Print a "Hello world" receipt" */
+            $printer = new Printer($connector);
+            /* Name of shop */
+            // $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+
+            $printer->selectPrintMode(Printer::MODE_FONT_A);
+            $printer->setFont(Printer::FONT_A);
+            $printer->text("--------------------------------\n");
+
+            $printer->selectPrintMode(Printer::MODE_FONT_B);
+            $printer->setFont(Printer::FONT_A);
+            $printer->text("Sai Ram Store\n");
+            $printer->text("Patanjali Aarogya Kendra\n");
+            
+            $printer->selectPrintMode(Printer::MODE_FONT_B);
+            $printer->setFont(Printer::FONT_C);
+            $printer->text("EWS/101, Housing Board Colony, Bhim Chowk\n");
+
+            $printer->selectPrintMode(Printer::MODE_FONT_A);
+            $printer->setFont(Printer::FONT_C);
+            $printer->text("--------------------------------\n");
+
+            $printer->selectPrintMode(Printer::MODE_FONT_B);
+            $printer->setFont(Printer::FONT_C);
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printId = $invoice->id;
+
+            for ($loop = count($invoice->id); $loop < 15; $loop++) { 
+                $printId = $printId." ";
+            }
+
+            $printer->text("Inv. No: ".$printId);
+
+            $printer->selectPrintMode(Printer::MODE_FONT_B);
+            $printer->setFont(Printer::FONT_C);
+            $printer->setJustification(Printer::JUSTIFY_RIGHT);
+            date_default_timezone_set("Asia/Calcutta");
+            $printer->text("Date: ".date("d/m/Y") ."\n\n");
+
+            $printer->selectPrintMode(Printer::MODE_UNDERLINE);
+            $printer->setFont(Printer::FONT_C);
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("Item         Price  Qty  Total \n\n");
+
+            $printer->selectPrintMode(Printer::MODE_FONT_B);
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+
+            foreach ($invoice->invoiceItems as $item) {
+                $printName = [];
+                $printIndex = 0;
+                $words = explode(' ', $item['name']);
+                foreach ($words as $index => $word) {
+                    if (strlen($word) > 14) {
+                        $word = substr($word, 0, 12);
+                        $word .= "..";
+                    }
+
+                    if (!array_key_exists($printIndex, $printName)) {
+                        $printName[$printIndex] = "";
+                    }
+
+                    if (strlen($printName[$printIndex]) + strlen($word) > 15) {
+                        $printIndex++;
+                    }
+                    if (!array_key_exists($printIndex, $printName)) {
+                        $printName[$printIndex] = "";
+                    }
+                    
+                    $printName[$printIndex] .= $word . " ";
+                    echo strlen($word . " ");
+                }
+                
+                foreach ($printName as $index => $name) {
+                    if ($index > 3) {
+                        break;
+                    }
+
+                    if ($index == 0) {
+                        $name .= "               ";
+                        $name = substr($name, 0, 15);
+                        $price = $item['mrp'] . "               ";
+                        $price = substr($price, 0, 8);
+                        $quantity = $item['qty'] . "               ";
+                        $quantity = substr($quantity, 0, 4);
+                        $itemTotal = $item['qty'] * $item['mrp'] . "               ";
+                        $itemTotal = substr($itemTotal, 0, 9);
+
+                        $printer->text($name."  ".$price."  ".$quantity."  ".$itemTotal."\n");
+                    } else {
+                        $printer->text($name."\n");
+                    }
+                }
+                $printer->text("------------------------------------------\n");
+                $total += $item['qty'] * $item['mrp'];
+            }
+           
+            $printer->setFont(Printer::FONT_A);
+            if ($invoice['discount'] > 0) {
+                // $printer->setJustification(Printer::JUSTIFY_RIGHT);
+                $printer->text("Subtotal:          Rs.". $total ."/-\n");
+                $printer->text("Discount:          Rs.". $invoice['discount'] ."/-\n");
+            }
+            $total -= $invoice['discount'];
+            $printer->text("Grand Total:       Rs.". $total ."/-\n");
+            $printer->text("--------------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->setFont(Printer::FONT_C);
+            $printer->text("Nice to see you. \nDo visit again.\n");
+
+            $printer->feed();
+            /* Title of receipt */
+            $printer->setEmphasis(true);
+
+            $printer->feed(2);
+
+            /* Cut the receipt and open the cash drawer */
+            $printer->cut();
+            $printer->pulse();
+            /* Close printer */
+            $printer->close();
+            return 'true';
+        } catch (Exception $e) {
+            // $message = "Couldn't print to this printer: " . $e->getMessage() . "\n";
+            return 'false';
+        }
     }
 }

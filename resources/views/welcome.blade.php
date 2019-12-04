@@ -82,6 +82,7 @@ input[type=number]::-webkit-outer-spin-button {
                                         <!-- <div class="col-md-12"> -->
                                             <v-client-table :data="invoices" :columns="invoice_columns" :options="table_options">
                                                 <a slot="view" slot-scope="props" class="fa fa-expand-arrows-alt" @click="editInvoice(props.row.id)" style="cursor: pointer;"></a>
+                                                <a slot="print" slot-scope="props" class="fa fa-print" @click="printBill(props.row.id)" style="cursor: pointer;"></a>
                                             </v-client-table>
                                             <modal name="showInvoice" height="auto" width="75%" style="font-size: 18px; text-align: center;">
                                                 
@@ -147,86 +148,10 @@ input[type=number]::-webkit-outer-spin-button {
                                                     <div @click="$modal.hide('showInvoice')" class="col-md-6" style="background-color: indianred">
                                                         Cancel
                                                     </div>
-                                                    <div @click="printBill('printMe')" class="col-md-6" style="background-color: darkseagreen">
+                                                    <div @click="printBill(invoice_id)" class="col-md-6" style="background-color: darkseagreen">
                                                         Print
                                                     </div>
                                                 </div>
-
-                                                <div id="printMe" hidden>
-                                                    <div class="row" style="font-size: 18px; font-weight: bold; margin-top: 2%; margin-bottom: 1%">
-                                                        <div class="col-md-1"></div>
-                                                        <div class="col-md-2"><br>
-                                                            <span v-if="invoiceType == 'Return'">Return</span>&nbsp;Invoice No. &nbsp; @{{ invoice_id }}
-                                                        </div>
-                                                        <div class="col-md-6" style="text-align: center;">
-                                                            Patanjali Aarogya Kendra <br>
-                                                            Sai Ram Store,<br>
-                                                            Bhim Chowk, Jaripatka, Nagpur-440014 <br>
-                                                            9595034566
-                                                        </div>      
-                                                        <div class="col-md-3"><br>
-                                                            @{{ invoice_date }}
-                                                        </div>
-                                                    </div>
-                                                    <div class="row" style="font-size: 22px;">
-                                                        <div class="col-md-12">
-                                                            <table class="table">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th scope="col">Sr. No.</th>
-                                                                        <th scope="col">Product</th>
-                                                                        <th scope="col">Tax</th>
-                                                                        <th scope="col">Price Incl. Tax</th>
-                                                                        <th scope="col">Qty</th>
-                                                                        <th scope="col">Amount</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody style="font-size: 22px;">
-                                                                    <tr v-for="(item, index) in billItems">
-                                                                        <th scope="row">@{{ index + 1 }}</th>
-                                                                        <th scope="row">@{{ item.name }}</th>
-                                                                        <th scope="row">@{{ item.tax }}%</th>
-                                                                        <th scope="row">@{{ item.mrp }}</th>
-                                                                        <th scope="row">@{{ item.qty }}</th>
-                                                                        <th scope="row">@{{ item.mrp * item.qty }}</th>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-12">
-                                                            <table class="table" style="font-size: 22px;">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th scope="col">
-                                                                        </th>
-                                                                        <th scope="col"></th>
-                                                                        <th scope="col">
-                                                                            <span v-if="discPercent">
-                                                                                <span>Disc %:&nbsp;&nbsp;</span>
-                                                                                <span>@{{ discPercent }}</span>
-                                                                            </span>
-                                                                        </th>
-                                                                        <th scope="col">
-                                                                            <span v-if="discAmt">
-                                                                                <span>Disc Amt:&nbsp;&nbsp;</span>
-                                                                                <span>@{{ discAmt }}</span>
-                                                                            </span>
-                                                                        </th>
-                                                                        <th scope="col" style="width: 30%;">
-                                                                            <span>Grand Total:&nbsp;&nbsp;</span>
-                                                                            <span style="font-size: 36px;">@{{ grand_total }}</span>
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                            </table>                                                    
-                                                        </div>
-                                                    </div>
-                                                    <h4 style="text-align: center;">It was great to see you<br>!! Do visit again !!</h4>
-                                                    
-                                                </div>      
-
 
                                             </modal>
                                             <!-- <table class="table">
@@ -277,84 +202,6 @@ input[type=number]::-webkit-outer-spin-button {
                                         </div>
                                         <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
                                         <!-- <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button> -->
-                                    </div>
-
-                                    <div hidden>
-                                        <!-- SOURCE -->
-                                        <div id="printMeNew">
-                                            <div class="row" style="font-size: 18px; font-weight: bold; margin-top: 2%; margin-bottom: 1%">
-                                                <div class="col-md-1"></div>
-                                                <div class="col-md-2"><br>
-                                                    <span v-if="invoiceType == 'Return'">Return</span>&nbsp;Invoice No. &nbsp; @{{ invoice_id }}
-                                                </div>
-                                                <div class="col-md-6" style="text-align: center;">
-                                                    Patanjali Aarogya Kendra <br>
-                                                    Sai Ram Store,<br>
-                                                    Bhim Chowk, Jaripatka, Nagpur-440014 <br>
-                                                    9595034566
-                                                </div>      
-                                                <div class="col-md-3"><br>
-                                                    @{{ invoice_date }}
-                                                </div>
-                                            </div>
-                                            <div class="row" style="font-size: 22px;">
-                                                <div class="col-md-12">
-                                                    <table class="table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th scope="col">Sr. No.</th>
-                                                                <th scope="col">Product</th>
-                                                                <th scope="col">Tax</th>
-                                                                <th scope="col">Price Incl. Tax</th>
-                                                                <th scope="col">Qty</th>
-                                                                <th scope="col">Amount</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody style="font-size: 22px;">
-                                                            <tr v-for="(item, index) in billItems">
-                                                                <th scope="row">@{{ index + 1 }}</th>
-                                                                <th scope="row">@{{ item.name }}</th>
-                                                                <th scope="row">@{{ item.tax }}%</th>
-                                                                <th scope="row">@{{ item.mrp }}</th>
-                                                                <th scope="row">@{{ item.qty }}</th>
-                                                                <th scope="row">@{{ item.mrp * item.qty }}</th>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <table class="table" style="font-size: 22px;">
-                                                        <thead>
-                                                            <tr>
-                                                                <th scope="col">
-                                                                </th>
-                                                                <th scope="col"></th>
-                                                                <th scope="col">
-                                                                    <span v-if="discPercent">
-                                                                        <span>Disc %:&nbsp;&nbsp;</span>
-                                                                        <span>@{{ discPercent }}</span>
-                                                                    </span>
-                                                                </th>
-                                                                <th scope="col">
-                                                                    <span v-if="discAmt">
-                                                                        <span>Disc Amt:&nbsp;&nbsp;</span>
-                                                                        <span>@{{ discAmt }}</span>
-                                                                    </span>
-                                                                </th>
-                                                                <th scope="col" style="width: 30%;">
-                                                                    <span>Grand Total:&nbsp;&nbsp;</span>
-                                                                    <span style="font-size: 36px;">@{{ grandTotal }}</span>
-                                                                </th>
-                                                            </tr>
-                                                        </thead>
-                                                    </table>                                                    
-                                                </div>
-                                            </div>
-                                            <h4 style="text-align: center;">It was great to see you<br>!! Do visit again !!</h4>
-                                            
-                                        </div>
                                     </div>
 
                                     <div id="billing-table" class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">

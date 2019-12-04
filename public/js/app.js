@@ -2260,7 +2260,7 @@ __webpack_require__.r(__webpack_exports__);
       invoice_date: '',
       invoice_id: 10,
       invoiceType: 'Sale',
-      invoice_columns: ['id', 'created_at', 'products_count', 'total', 'discount', 'grand_total', 'payment_mode', 'type', 'view'],
+      invoice_columns: ['id', 'created_at', 'products_count', 'total', 'discount', 'grand_total', 'payment_mode', 'type', 'view', 'print'],
       table_options: {
         sortable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
         filterable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
@@ -2695,9 +2695,7 @@ __webpack_require__.r(__webpack_exports__);
         });
 
         if (printBill) {
-          setTimeout(function () {
-            _this7.printBill('printMeNew');
-          }, 250);
+          _this7.printBill(_this7.invoice_id);
         }
 
         _this7.getInventory();
@@ -2737,7 +2735,22 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     printBill: function printBill(id) {
-      this.Popup($(document.getElementById(id)).html());
+      var _this9 = this;
+
+      axios.get("api/print-invoice/".concat(id)).then(function (response) {
+        Vue.notify({
+          group: 'foo',
+          title: 'Printed Successfully',
+          text: "Invoice printed Successfully",
+          type: 'success',
+          duration: 2000,
+          speed: 1000
+        });
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this9.errors = error.response.data.errors || {};
+        }
+      });
     },
     Popup: function Popup(data) {
       var mywindow = window.open('', 'new div', 'height=400,width=600');
@@ -2758,32 +2771,32 @@ __webpack_require__.r(__webpack_exports__);
       // this.$htmlToPaper('printMe');
     },
     editInvoice: function editInvoice(id) {
-      var _this9 = this;
+      var _this10 = this;
 
       this.$modal.show("showInvoice");
       axios.get("api/invoice/".concat(id)).then(function (response) {
         var invoice = response.data;
-        _this9.billItems = invoice.invoice_items;
-        _this9.discPercent = invoice.discount_percent;
-        _this9.discAmt = invoice.discount;
-        _this9.grand_total = invoice.grand_total;
-        _this9.invoice_id = invoice.id;
-        _this9.invoice_date = invoice.created_at;
-        _this9.invoiceType = invoice.type;
-        _this9.paymentMode = invoice.payment_mode;
-        _this9.rechargeAmt = invoice.recharge_amount;
+        _this10.billItems = invoice.invoice_items;
+        _this10.discPercent = invoice.discount_percent;
+        _this10.discAmt = invoice.discount;
+        _this10.grand_total = invoice.grand_total;
+        _this10.invoice_id = invoice.id;
+        _this10.invoice_date = invoice.created_at;
+        _this10.invoiceType = invoice.type;
+        _this10.paymentMode = invoice.payment_mode;
+        _this10.rechargeAmt = invoice.recharge_amount;
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this9.errors = error.response.data.errors || {};
+          _this10.errors = error.response.data.errors || {};
         }
       });
     },
     resetData: function resetData() {
-      var _this10 = this;
+      var _this11 = this;
 
       console.log("I got a call");
       setTimeout(function () {
-        Object.assign(_this10.$data, _this10.$options.data());
+        Object.assign(_this11.$data, _this11.$options.data());
         console.log("Reset");
       }, 2000);
     },
@@ -2849,15 +2862,14 @@ __webpack_require__.r(__webpack_exports__);
     },
     getInvoices: function getInvoices() {
       if (this.$refs.invoicer) {
-        this.$refs.invoicer.resetData();
+        //this.$refs.invoicer.resetData();
         this.$refs.invoicer.getInvoices();
       }
     },
     getInvoicer: function getInvoicer() {
       this.route = 'sale';
 
-      if (this.$refs.invoicer) {
-        this.$refs.invoicer.resetData();
+      if (this.$refs.invoicer) {//this.$refs.invoicer.resetData();
       }
     }
   }

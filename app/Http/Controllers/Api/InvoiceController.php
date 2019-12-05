@@ -8,6 +8,8 @@ use App\Batch;
 use App\Product;
 use App\Invoice;
 use App\InvoiceItem;
+use App\DailyClosing;
+use App\Expense;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\Printer;
@@ -74,10 +76,14 @@ class InvoiceController extends Controller
             $invoiceItem->type = 'sale';
             $invoiceItem->save();
 
-            if ($batch->qty > $item['qty']) {
-                $batch->qty -= $item['qty'];
+            if ($requestData['type'] == 'Return') {
+                $batch->qty += $item['qty'];
             } else {
-                $batch->qty = 0;
+                if ($batch->qty > $item['qty']) {
+                    $batch->qty -= $item['qty'];
+                } else {
+                    $batch->qty = 0;
+                }
             }
             $batch->save();
             
@@ -266,6 +272,54 @@ class InvoiceController extends Controller
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->setFont(Printer::FONT_C);
             $printer->text("Nice to see you. \nDo visit again.\n");
+
+            $printer->feed();
+            /* Title of receipt */
+            $printer->setEmphasis(true);
+
+            $printer->feed(2);
+
+            /* Cut the receipt and open the cash drawer */
+            $printer->cut();
+            $printer->pulse();
+            /* Close printer */
+            $printer->close();
+            return 'true';
+        } catch (Exception $e) {
+            // $message = "Couldn't print to this printer: " . $e->getMessage() . "\n";
+            return 'false';
+        }
+    }
+
+    public function printClosing($closingDayId)
+    {
+        $closingDay = DailyClosing::find($closingDayId);
+        try {
+            $total = 0;
+            $totalQty = 0;
+            // Enter the share name for your USB printer here
+            //$connector = "POS-58";
+            $connector = new WindowsPrintConnector("POS-58-Series");
+            //$connector = new WindowsPrintConnector("103.252.169.199");
+            /* Print a "Hello world" receipt" */
+            $printer = new Printer($connector);
+            /* Name of shop */
+            // $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+
+            $printer->selectPrintMode(Printer::MODE_FONT_A);
+            $printer->setFont(Printer::FONT_A);
+
+            $printer->text("--------------------------------\n");
+            $printer->selectPrintMode(Printer::MODE_FONT_B);
+            $printer->setFont(Printer::FONT_A);
+            $printer->text("Date:  ".$closingDay['date']."\n");
+            $printer->text("Total Sales:  ".$closingDay['sales']."\n");
+            $printer->text("Total Returns:  ".$closingDay['returns']."\n");
+            $printer->text("Total Expenses:  ".$closingDay['expenses']."\n");
+            $printer->text("Expected Closing Cash:  ".$closingDay['expected_closing_cash']."\n"); 
+            $printer->text("Closing Cash:  ".$closingDay['closing_cash']."\n");     
+            $printer->text("--------------------------------\n");
 
             $printer->feed();
             /* Title of receipt */

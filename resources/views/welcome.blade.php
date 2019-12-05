@@ -126,6 +126,7 @@ input:checked + .slider:before {
                             <div class="dropdown-content">
                                 <a href="#" @click="getInvoicer()">Sale</a>
                                 <a href="#" @click="getInvoices()">Invoices</a>
+                                <a href="#" @click="getInvoices(true)">Expenses and Closing</a>
                             </div>
                         </div>
                         <div class="dropdown" style="margin-left: 2%;">
@@ -139,7 +140,7 @@ input:checked + .slider:before {
                     </div>
 
                     <div class="content" style="margin-top: 0.7%;">
-                        <div v-if="route === 'sale' || route === 'invoices'">
+                        <div v-if="route === 'sale' || route === 'invoices' || route == 'expenses'">
                             
                             <invoicer ref="invoicer" inline-template>
 
@@ -250,10 +251,66 @@ input:checked + .slider:before {
                                         <!-- </div> -->
                                     <!-- </div> -->
                                 </div>
+                                
+                                <div class="m-b-md" style="font-size: 18px;" v-else-if="$parent.route == 'expenses'">
+                                    <div style="font-size: 65px;">Expenses and Daily Closing</div>
+                                    <b>Select Date:&nbsp;&nbsp;</b> <input type="date" name="" @change="changedClosingDate" v-model="closingDate">
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div style="font-size: 28px; text-align: left;">
+                                                <p>Sales:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="total_sales"></span>
+                                                </p>
+                                                <p>Returns:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="total_returns"></span>
+                                                </p>
+                                                <p>Total Expenses:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="totalExpenses"></span>
+                                                </p>
+                                                <p>Expected Closing Cash:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="expected_closing_cash"></span>
+                                                </p>
+                                                <div class="row">
+                                                    <div class="col-md-4">Closing Cash:</div>
+                                                    <div class="col-md-5">
+                                                        <input style="font-size:22px; width: 50%; margin: auto;" class="form-control" type="number" name="" v-model="closing_cash">
+                                                    </div>
+                                                     <div class="col-md-3"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div style="font-size: 36px;">Expenses</div>
+                                            <table class="table">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th scope="col">Sr. No.</th>
+                                                        <th scope="col">Remark</th>
+                                                        <th scope="col">Amount</th>
+                                                        <th scope="col">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(expense, index) in expenses">
+                                                        <th scope="row">@{{ index + 1 }}</th>
+                                                        <td>
+                                                            <input class="form-control" type="text" name="" v-model="expense.remark">
+                                                        </td>
+                                                        <td>
+                                                            <input style="width: 30%; margin: auto;" class="form-control" type="number" name="" v-model="expense.amount">
+                                                        </td>
+                                                        <td><i @click="removeExpense(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <i style="cursor: pointer; color: cornflowerblue; font-size: 22px;" class="fas fa-plus-circle" @click="addExpense()"> Add Expense</i>
+                                        </div>
+                                        <div class="col-md-1">
+                                        </div>
+                                    </div>
+                                    <span style="font-size: 22px; margin:20px; cursor: pointer; padding: 12px; background-color: seagreen; color: white;" @click="saveExpense()">Save</span>
+                                    <span style="font-size: 22px; margin:20px; cursor: pointer; padding: 12px; background-color: seagreen; color: white;" @click="printExpense()">Print</span>
+                                </div>
 
-
-                                <div style="font-size: 18px;" v-else="">
-
+                                <div style="font-size: 18px;" v-else="">                
                                     <div class="row" style="margin-top: 0.8%; margin-bottom: 3%; margin-left: 8%;">
                                         <div class="col-md-2">
                                         </div>
@@ -358,6 +415,45 @@ input:checked + .slider:before {
                                 </div>
                             </invoicer>
                         </div>
+
+                        <div class="m-b-md" style="font-size: 65px;" v-else-if="route == 'Bills'">
+                            Purchase Orders
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col">Bill No</th>
+                                        <th scope="col">Amount</th>
+                                        <th scope="col">Remark</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(bill, index) in savedBills">
+                                        <td>
+                                            <span v-text="bill.bill_no">
+                                        </td>
+                                        <td>
+                                            <span v-text="bill.amount">
+                                        </td>
+                                        <td><span v-text="bill.remark"></td>
+                                        <td><i @click="removeSavedBill(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
+                                    </tr>
+                                    <tr v-for="(bill, index) in newBills">
+                                        <td>
+                                            <input class="form-control" type="text" name="" v-model="bill.bill_no">
+                                        </td>
+                                        <td>
+                                            <input style="width: 30%; margin: auto;" class="form-control" type="number" name="" v-model="bill.amount">
+                                        </td>
+                                        <td>
+                                            <input style="width: 30%; margin: auto;" class="form-control" type="number" name="" v-model="bill.remark">
+                                        </td>
+                                        <td><i @click="removeBill(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
+                                        <i style="cursor: pointer; color: cornflowerblue; font-size: 22px;" class="fas fa-plus-circle" @click="addExpense()"> Add New Bill</i>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         
                         <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'stockList'">
                             Stock List
@@ -439,7 +535,7 @@ input:checked + .slider:before {
                                                         <td>@{{ item.qty_avl }}</td>
                                                         <td style="width: 10%;"><input type="number" name="cost-price" style="width: 60%; text-align: center; border-radius: 10%;" v-model="item.cost_price"></td>
                                                         <td style="width: 10%;"><input type="number" name="qty" v-model="item.qty" style="width: 45%; text-align: center; border-radius: 10%;"></td>
-                                                        <td v-if="applyTax">@{{ getTaxedPrice(item) }}</td>
+                                                        <td v-if="applyTax">@{{ getTaxedPrice(item) * item.qty }}</td>
                                                         <td v-else>@{{ item.cost_price * item.qty }}</td>   
                                                         <td><i @click="removeItem(index)" class="fas fa-trash" style="cursor: pointer;"></i>
                                                         </td>

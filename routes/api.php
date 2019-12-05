@@ -22,5 +22,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('get-items/{query}', 'Api\ApiController@getItems');
 Route::get('get-all-items', 'Api\ApiController@getAllItems');
 Route::resource('invoice', 'Api\InvoiceController');
+Route::resource('expense', 'Api\ExpenseController');
+Route::post('save-sales-returns', 'Api\ExpenseController@saveSalesReturn');
 Route::get('print-invoice/{query}', 'Api\InvoiceController@printInvoice');
+Route::get('print-closing/{query}', 'Api\InvoiceController@printClosing');
 Route::post('update-items', 'Api\ApiController@updateItems');

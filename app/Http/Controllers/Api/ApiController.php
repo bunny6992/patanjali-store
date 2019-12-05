@@ -88,4 +88,17 @@ class ApiController extends Controller
 
         return;
     }
+
+    public function saveSalesReturn(Request $request)
+    {
+        return $request->all();
+        $requestData = $request->all();
+        $closingModel = DailyClosing::find($requestData['closing_date_id']);
+        $closingModel->sales = $requestData['total_sales'];
+        $closingModel->returns = $requestData['total_returns'];
+        $closingModel->expected_closing_cash = $requestData['expected_closing_cash'];
+        $closingModel->save();
+
+        return ;
+    }
 }

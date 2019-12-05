@@ -2243,6 +2243,14 @@ __webpack_require__.r(__webpack_exports__);
       },
       allItems: [],
       itemOptions: [],
+      closingDays: {},
+      closingDayExists: false,
+      deletedExpenses: [],
+      expenses: [],
+      total_sales: 0,
+      total_returns: 0,
+      closing_cash: "",
+      closingDate: "",
       newItem: {},
       rechargeAmt: '',
       billItems: [],
@@ -2277,11 +2285,56 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     this.getInventory();
     this.focusOnSearch();
+    var d = new Date();
+    var dd = d.getDate();
+    var mm = d.getMonth() + 1;
+    var yyyy = d.getFullYear();
+
+    if (dd < 10) {
+      dd = '0' + dd;
+    }
+
+    if (mm < 10) {
+      mm = '0' + mm;
+    }
+
+    this.closingDate = yyyy + '-' + mm + '-' + dd;
   },
   computed: {
+    expected_closing_cash: function expected_closing_cash() {
+      return this.total_sales - this.total_returns - this.totalExpenses;
+    },
+    totalExpenses: function totalExpenses() {
+      var total = 0;
+
+      _.forEach(this.expenses, function (expense, key) {
+        total += parseFloat(expense.amount);
+      });
+
+      return total;
+    },
     grandTotal: function grandTotal() {
+      var _this = this;
+
       if (this.billItems.length > 0) {
         var total = 0;
+
+        if (this.$parent.route == 'updateStock') {
+          //return 100;
+          var costPrice = 0;
+
+          _.forEach(this.billItems, function (item, key) {
+            if (_this.applyTax) {
+              costPrice = _this.getTaxedPrice(item);
+            } else {
+              costPrice = item.cost_price;
+            }
+
+            total += parseFloat(costPrice) * parseInt(item.qty);
+          });
+
+          return total;
+        }
 
         _.forEach(this.billItems, function (item, key) {
           total += parseFloat(item.mrp) * parseInt(item.qty);
@@ -2348,13 +2401,13 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     getInventory: function getInventory() {
-      var _this = this;
+      var _this2 = this;
 
       axios.get("api/get-all-items").then(function (response) {
-        _this.allItems = response.data;
+        _this2.allItems = response.data;
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this.errors = error.response.data.errors || {};
+          _this2.errors = error.response.data.errors || {};
         }
       });
     },
@@ -2370,7 +2423,7 @@ __webpack_require__.r(__webpack_exports__);
       // }, 1000);
     },
     onSearch: function onSearch(search, loading) {
-      var _this2 = this;
+      var _this3 = this;
 
       //loading(true);
       //this.search(loading, search, this);
@@ -2383,16 +2436,16 @@ __webpack_require__.r(__webpack_exports__);
         var test = search;
 
         if (search.length == 0) {
-          test = _this2.$refs.test._data._value;
+          test = _this3.$refs.test._data._value;
         }
 
         if (test.length > 3) {
-          _this2.search(loading, search, _this2);
+          _this3.search(loading, search, _this3);
         }
       }, 750);
     },
     askForQty: function askForQty() {
-      var _this3 = this;
+      var _this4 = this;
 
       Swal.fire({
         title: 'Kitne Chahiye??',
@@ -2403,14 +2456,14 @@ __webpack_require__.r(__webpack_exports__);
         inputPlaceholder: 'How Many?'
       }).then(function (text) {
         if (!isNaN(text.value)) {
-          _this3.newItem.qty = text.value;
+          _this4.newItem.qty = text.value;
         }
 
-        _this3.focusOnSearch();
+        _this4.focusOnSearch();
       });
     },
     search: function search(loading, _search, vm) {
-      var _this4 = this;
+      var _this5 = this;
 
       // console.log(search);
       // console.log(this.$refs.test._data._value);
@@ -2424,16 +2477,14 @@ __webpack_require__.r(__webpack_exports__);
         query = this.$refs.test._data._value;
       }
 
-      var products = [];
-
-      _.forEach(this.allItems, function (item) {
-        var tempName = item.name.toLowerCase();
-        tempName += item.barcode;
-
-        if (tempName.search(query.toLowerCase()) > 0) {
-          products.push(item);
-        }
-      });
+      var products = this.allItems; // let products = [];
+      // _.forEach(this.allItems, (item) => {
+      //     let tempName = item.name.toLowerCase();
+      //     tempName += item.barcode;
+      //     if (tempName.search(query.toLowerCase()) > 0) {
+      //         products.push(item);
+      //     }
+      // });
 
       vm.options = [];
       this.selectFlag = false;
@@ -2458,7 +2509,7 @@ __webpack_require__.r(__webpack_exports__);
         _.forEach(products, function (value, key) {
           vm.options.push(value.name + " MRP-" + value.mrp);
 
-          _this4.itemOptions.push({
+          _this5.itemOptions.push({
             id: value.name + " MRP-" + value.mrp,
             product_id: value.product_id,
             batch_id: value.batch_id,
@@ -2497,7 +2548,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     addToBill: function addToBill() {
-      var _this5 = this;
+      var _this6 = this;
 
       if (this.checkIfAdded()) {
         return;
@@ -2511,7 +2562,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       this.timer3 = setTimeout(function () {
-        var container = _this5.$el.querySelector("#billing-table");
+        var container = _this6.$el.querySelector("#billing-table");
 
         container.scrollTop = container.scrollHeight;
         window.scrollTo({
@@ -2561,8 +2612,15 @@ __webpack_require__.r(__webpack_exports__);
     removeItem: function removeItem(index) {
       this.$delete(this.billItems, index);
     },
+    removeExpense: function removeExpense(index) {
+      if (this.closingDayExists && this.expenses[index]['id']) {
+        this.deletedExpenses.push(this.expenses[index]['id']);
+      }
+
+      this.$delete(this.expenses, index);
+    },
     changed: function changed() {
-      var _this6 = this;
+      var _this7 = this;
 
       if (this.selectFlag) {
         if (this.timer2) {
@@ -2571,13 +2629,12 @@ __webpack_require__.r(__webpack_exports__);
         }
 
         this.timer2 = setTimeout(function () {
-          var item = _.find(_this6.itemOptions, {
-            'id': _this6.$refs.test._data._value
+          var item = _.find(_this7.itemOptions, {
+            'id': _this7.$refs.test._data._value
           });
 
           if (item) {
-            console.log(item);
-            _this6.newItem = {
+            _this7.newItem = {
               id: item.name + " MRP-" + item.mrp,
               name: item.name,
               mrp: item.mrp,
@@ -2588,11 +2645,11 @@ __webpack_require__.r(__webpack_exports__);
               qty: 1
             }; // this.askForQty();
 
-            _this6.addToBill();
+            _this7.addToBill();
 
-            _this6.resetSearch();
+            _this7.resetSearch();
 
-            _this6.focusOnSearch();
+            _this7.focusOnSearch();
           }
         }, 200);
       }
@@ -2671,7 +2728,7 @@ __webpack_require__.r(__webpack_exports__);
       this.saveBill();
     },
     saveBill: function saveBill() {
-      var _this7 = this;
+      var _this8 = this;
 
       var printBill = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
@@ -2690,8 +2747,8 @@ __webpack_require__.r(__webpack_exports__);
       data.type = this.invoiceType;
       axios.post("api/invoice", data).then(function (response) {
         var invoice = response.data;
-        _this7.invoice_id = invoice.invoice.id;
-        _this7.invoice_date = invoice.invoice.created_at;
+        _this8.invoice_id = invoice.invoice.id;
+        _this8.invoice_date = invoice.invoice.created_at;
         Vue.notify({
           group: 'foo',
           title: 'Yay!',
@@ -2702,47 +2759,50 @@ __webpack_require__.r(__webpack_exports__);
         });
 
         if (printBill) {
-          _this7.printBill(_this7.invoice_id);
+          _this8.printBill(_this8.invoice_id);
         }
 
-        _this7.getInventory();
+        _this8.getInventory();
 
         setTimeout(function () {
-          _this7.resetSearch();
+          _this8.resetSearch();
 
-          _this7.invoiceType = 'Sale';
-          _this7.itemOptions = [];
-          _this7.newItem = {};
-          _this7.billItems = [];
-          _this7.selectFlag = false;
-          _this7.makeRequest = true;
-          _this7.discAmt = null;
-          _this7.discPercent = null;
-          _this7.paymentMode = "Cash";
+          _this8.invoiceType = 'Sale';
+          _this8.itemOptions = [];
+          _this8.newItem = {};
+          _this8.billItems = [];
+          _this8.selectFlag = false;
+          _this8.makeRequest = true;
+          _this8.discAmt = null;
+          _this8.discPercent = null;
+          _this8.paymentMode = "Cash";
         }, 500);
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this7.errors = error.response.data.errors || {};
+          _this8.errors = error.response.data.errors || {};
         }
       });
     },
     getInvoices: function getInvoices() {
-      var _this8 = this;
+      var _this9 = this;
 
-      this.$parent.route = "invoices";
+      var route = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'sale';
+      this.$parent.route = route;
 
       if (this.getInvFlag) {
         axios.get("api/invoice").then(function (response) {
-          _this8.invoices = response.data;
+          _this9.invoices = response.data;
+
+          _this9.calculateFigures();
         })["catch"](function (error) {
           if (error.response.status === 422) {
-            _this8.errors = error.response.data.errors || {};
+            _this9.errors = error.response.data.errors || {};
           }
         });
       }
     },
     printBill: function printBill(id) {
-      var _this9 = this;
+      var _this10 = this;
 
       axios.get("api/print-invoice/".concat(id)).then(function (response) {
         Vue.notify({
@@ -2755,7 +2815,7 @@ __webpack_require__.r(__webpack_exports__);
         });
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this9.errors = error.response.data.errors || {};
+          _this10.errors = error.response.data.errors || {};
         }
       });
     },
@@ -2778,33 +2838,31 @@ __webpack_require__.r(__webpack_exports__);
       // this.$htmlToPaper('printMe');
     },
     editInvoice: function editInvoice(id) {
-      var _this10 = this;
+      var _this11 = this;
 
       this.$modal.show("showInvoice");
       axios.get("api/invoice/".concat(id)).then(function (response) {
         var invoice = response.data;
-        _this10.billItems = invoice.invoice_items;
-        _this10.discPercent = invoice.discount_percent;
-        _this10.discAmt = invoice.discount;
-        _this10.grand_total = invoice.grand_total;
-        _this10.invoice_id = invoice.id;
-        _this10.invoice_date = invoice.created_at;
-        _this10.invoiceType = invoice.type;
-        _this10.paymentMode = invoice.payment_mode;
-        _this10.rechargeAmt = invoice.recharge_amount;
+        _this11.billItems = invoice.invoice_items;
+        _this11.discPercent = invoice.discount_percent;
+        _this11.discAmt = invoice.discount;
+        _this11.grand_total = invoice.grand_total;
+        _this11.invoice_id = invoice.id;
+        _this11.invoice_date = invoice.created_at;
+        _this11.invoiceType = invoice.type;
+        _this11.paymentMode = invoice.payment_mode;
+        _this11.rechargeAmt = invoice.recharge_amount;
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this10.errors = error.response.data.errors || {};
+          _this11.errors = error.response.data.errors || {};
         }
       });
     },
     resetData: function resetData() {
-      console.log("I got a call"); // setTimeout(() => {
+      // setTimeout(() => {
       //Object.assign(this.$data, this.$options.data());
-
       this.billItems = [];
-      this.applyTax = false;
-      console.log("Reset"); // },2000);
+      this.applyTax = false; // },2000);
     },
     validateData: function validateData() {
       if (this.billItems.length == 0) {
@@ -2822,11 +2880,11 @@ __webpack_require__.r(__webpack_exports__);
       return true;
     },
     updateStock: function updateStock() {
-      var _this11 = this;
+      var _this12 = this;
 
       if (this.applyTax) {
         _.forEach(this.billItems, function (item, key) {
-          item.cost_price = _this11.getTaxedPrice(item);
+          item.cost_price = _this12.getTaxedPrice(item);
         });
       }
 
@@ -2840,15 +2898,165 @@ __webpack_require__.r(__webpack_exports__);
           speed: 1000
         });
 
-        _this11.resetData();
+        _this12.resetData();
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this11.errors = error.response.data.errors || {};
+          _this12.errors = error.response.data.errors || {};
         }
       });
     },
     getTaxedPrice: function getTaxedPrice(item) {
-      return (item.cost_price * [1 + item.tax / 100]).toFixed(2) * item.qty;
+      return (item.cost_price * [1 + item.tax / 100]).toFixed(2);
+    },
+    addExpense: function addExpense() {
+      this.expenses.push({
+        amount: "",
+        remark: "",
+        "new": true
+      });
+    },
+    saveExpense: function saveExpense() {
+      var _this13 = this;
+
+      var data = {
+        expenses: this.expenses,
+        total_expenses: this.totalExpenses,
+        closing_cash: this.closing_cash,
+        expected_closing_cash: this.expected_closing_cash,
+        total_sales: this.total_sales,
+        total_returns: this.total_returns,
+        closing_date: this.closingDate,
+        deleted_expenses: this.deletedExpenses
+      };
+
+      if (this.closingDayExists) {
+        data.closing_date_id = this.closingDays[this.closingDate]['id'];
+      }
+
+      axios.post("api/expense", data).then(function (response) {
+        Vue.notify({
+          group: 'foo',
+          title: 'Closings and Expenses',
+          text: "Saved Successfully!",
+          type: 'success',
+          duration: 2000,
+          speed: 1000
+        });
+        _this13.closingDays[_this13.closingDate] = response.data[_this13.closingDate];
+        _this13.closingDayExists = true;
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this13.errors = error.response.data.errors || {};
+        }
+      });
+    },
+    saveSalesReturn: function saveSalesReturn() {
+      var _this14 = this;
+
+      var data = {
+        expected_closing_cash: this.expected_closing_cash,
+        total_sales: this.total_sales,
+        total_returns: this.total_returns
+      };
+      data.closing_date_id = this.closingDays[this.closingDate]['id'];
+      axios.post("api/save-sales-returns", data).then(function (response) {
+        Vue.notify({
+          group: 'foo',
+          title: 'Closings and Expenses',
+          text: "Saved Successfully!",
+          type: 'success',
+          duration: 2000,
+          speed: 1000
+        }); //if (closingDayExists) {
+        //}
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this14.errors = error.response.data.errors || {};
+        }
+      });
+    },
+    printExpense: function printExpense() {
+      var _this15 = this;
+
+      if (!this.closingDayExists) {
+        return;
+      }
+
+      var id = this.closingDays[this.closingDate]['id'];
+      axios.get("api/print-closing/".concat(id)).then(function (response) {
+        Vue.notify({
+          group: 'foo',
+          title: 'Printed Successfully',
+          text: "Closings printed Successfully",
+          type: 'success',
+          duration: 2000,
+          speed: 1000
+        });
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this15.errors = error.response.data.errors || {};
+        }
+      });
+    },
+    calculateFigures: function calculateFigures() {
+      var total_sales = 0;
+      var total_returns = 0;
+      var d1 = new Date(this.closingDate);
+
+      _.forEach(this.invoices, function (invoice, key) {
+        var d2 = new Date(invoice.created_at);
+
+        if (d2.toLocaleDateString() == d1.toLocaleDateString()) {
+          if (invoice.type == "Sale") {
+            total_sales = parseFloat(invoice.grand_total) + total_sales;
+          } else {
+            total_returns = parseFloat(invoice.grand_total) + total_returns;
+          }
+        }
+      });
+
+      this.total_sales = total_sales;
+      this.total_returns = total_returns;
+    },
+    getExpenses: function getExpenses() {
+      var _this16 = this;
+
+      axios.get("api/expense").then(function (response) {
+        _this16.closingDays = response.data;
+        setTimeout(function () {
+          _this16.fetchExpenses();
+        }, 1000);
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this16.errors = error.response.data.errors || {};
+        }
+      });
+    },
+    fetchExpenses: function fetchExpenses() {
+      this.deletedExpenses = [];
+      this.closingDayExists = false;
+
+      if (this.closingDays[this.closingDate]) {
+        console.log("I'm in at1");
+        this.closingDayExists = true;
+        var savedDay = this.closingDays[this.closingDate];
+
+        if (this.total_returns != savedDay['total_returns'] || this.total_sales != savedDay['total_sales']) {
+          this.saveSalesReturn();
+        }
+
+        this.expenses = savedDay['expenses'];
+        this.closing_cash = savedDay['closing_cash'];
+      }
+    },
+    changedClosingDate: function changedClosingDate() {
+      this.total_sales = 0;
+      this.total_returns = 0;
+      this.total_expenses = 0;
+      this.expenses = [];
+      this.closing_cash = 0;
+      this.calculateFigures();
+      this.fetchExpenses();
     }
   }
 });
@@ -2897,9 +3105,19 @@ __webpack_require__.r(__webpack_exports__);
       this.file = this.$refs.file.files[0];
     },
     getInvoices: function getInvoices() {
-      if (this.$refs.invoicer) {
+      var getExpenses = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      if (getExpenses) {
+        this.$parent.route = "expenses";
+      } else {
+        this.$parent.route = "invoices";
+      }
+
+      if (this.$refs.invoicer && this.$parent.route == "expenses") {
+        var route = this.$parent.route;
         this.$refs.invoicer.resetData();
-        this.$refs.invoicer.getInvoices();
+        this.$refs.invoicer.getInvoices(route);
+        this.$refs.invoicer.getExpenses();
       }
     },
     getInvoicer: function getInvoicer() {

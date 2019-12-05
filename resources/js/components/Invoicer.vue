@@ -11,6 +11,14 @@
                 },
                 allItems: [],
                 itemOptions: [],
+                closingDays: {},
+                closingDayExists: false,
+                deletedExpenses: [],
+                expenses: [],
+                total_sales: 0,
+                total_returns: 0,
+                closing_cash: "",
+                closingDate: "",
                 newItem: {},
                 rechargeAmt: '',
                 billItems: [],
@@ -58,12 +66,53 @@
         mounted() {
             this.getInventory();
             this.focusOnSearch();
+            let d = new Date;
+            var dd = d.getDate();
+            var mm = d.getMonth()+1; 
+            var yyyy = d.getFullYear();
+            if(dd<10) 
+            {
+                dd='0'+dd;
+            } 
+
+            if(mm<10) 
+            {
+                mm='0'+mm;
+            }
+            this.closingDate = yyyy + '-' + mm + '-'+ dd;
         },
 
         computed: {
+            expected_closing_cash() {
+                return this.total_sales - this.total_returns - this.totalExpenses;
+            },
+
+            totalExpenses() {
+                let total = 0;
+                _.forEach(this.expenses, (expense, key) => {
+                    total += parseFloat(expense.amount);
+                });
+                return total;
+            },
+
             grandTotal() {
                 if (this.billItems.length > 0) {
                     let total = 0;
+
+                    if (this.$parent.route == 'updateStock') {
+                        //return 100;
+                        let costPrice = 0;
+                        _.forEach(this.billItems, (item, key) => {
+                            if (this.applyTax) {
+                                costPrice = this.getTaxedPrice(item);
+                            } else {
+                                costPrice = item.cost_price;
+                            }
+                            total += parseFloat(costPrice) * parseInt(item.qty);
+                        });
+                        return total;
+                    }
+
                     _.forEach(this.billItems, (item, key) => {
                         total += parseFloat(item.mrp) * parseInt(item.qty);
                     });
@@ -81,6 +130,7 @@
             billTotal() {
                 if (this.billItems.length > 0) {
                     let total = 0;
+
                     _.forEach(this.billItems, (item, key) => {
                         total += parseFloat(item.mrp) * parseInt(item.qty);
                     });
@@ -198,15 +248,15 @@
                 if (search.length == 0) {
                     query = this.$refs.test._data._value;
                 }
-
-                let products = [];
-                _.forEach(this.allItems, (item) => {
-                    let tempName = item.name.toLowerCase();
-                    tempName += item.barcode;
-                    if (tempName.search(query.toLowerCase()) > 0) {
-                        products.push(item);
-                    }
-                });
+                let products = this.allItems;
+                // let products = [];
+                // _.forEach(this.allItems, (item) => {
+                //     let tempName = item.name.toLowerCase();
+                //     tempName += item.barcode;
+                //     if (tempName.search(query.toLowerCase()) > 0) {
+                //         products.push(item);
+                //     }
+                // });
 
                 vm.options = [];
                 this.selectFlag = false;
@@ -330,6 +380,13 @@
                 this.$delete(this.billItems,index);
             },
 
+            removeExpense(index) {
+                if (this.closingDayExists && this.expenses[index]['id']) {
+                    this.deletedExpenses.push(this.expenses[index]['id']);
+                }
+                this.$delete(this.expenses,index);
+            },
+
             changed() {
                 if(this.selectFlag) {
 
@@ -340,7 +397,6 @@
                     this.timer2 = setTimeout(() => {
                         let item = _.find(this.itemOptions, { 'id': this.$refs.test._data._value });
                         if (item) {
-                            console.log(item);
                             this.newItem = {
                                 id: item.name + " MRP-" + item.mrp,
                                 name: item.name,
@@ -493,12 +549,13 @@
                 });
             },
 
-            getInvoices() {
-                this.$parent.route = "invoices";
+            getInvoices(route = 'sale') {
+                this.$parent.route = route;
                 if (this.getInvFlag) {
                     axios.get("api/invoice")
                     .then(response => {
                         this.invoices = response.data;
+                        this.calculateFigures();
                     }).catch(error => {
                         if (error.response.status === 422) {
                             this.errors = error.response.data.errors || {};
@@ -569,12 +626,10 @@
             },
 
             resetData() {
-                console.log("I got a call");
                 // setTimeout(() => {
                     //Object.assign(this.$data, this.$options.data());
                     this.billItems = [];
                     this.applyTax = false;
-                    console.log("Reset");
                 // },2000);
                 
             },
@@ -624,8 +679,160 @@
             },
 
             getTaxedPrice(item) {
-                return (item.cost_price * [1 + item.tax/100]).toFixed(2) * item.qty;
-            }
+                return (item.cost_price * [1 + item.tax/100]).toFixed(2);
+            },
+
+            addExpense(){
+                this.expenses.push({
+                    amount: "",
+                    remark: "",
+                    new: true
+                });
+            },
+
+            saveExpense() {
+                let data = {
+                    expenses: this.expenses,
+                    total_expenses: this.totalExpenses,
+                    closing_cash: this.closing_cash,
+                    expected_closing_cash: this.expected_closing_cash,
+                    total_sales: this.total_sales,
+                    total_returns: this.total_returns,
+                    closing_date: this.closingDate,
+                    deleted_expenses: this.deletedExpenses
+                }
+                if(this.closingDayExists) {
+                    data.closing_date_id = this.closingDays[this.closingDate]['id']
+                }
+                axios.post("api/expense", data)
+                .then(response => {
+                    Vue.notify({
+                        group: 'foo',
+                        title: 'Closings and Expenses',
+                        text: "Saved Successfully!",
+                        type: 'success',
+                        duration: 2000,
+                        speed: 1000
+                    });
+                    this.closingDays[this.closingDate] = response.data[this.closingDate];
+                    this.closingDayExists = true;
+
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                      this.errors = error.response.data.errors || {};
+                    }
+                });
+            },
+
+            saveSalesReturn() {
+                let data = {
+                    expected_closing_cash: this.expected_closing_cash,
+                    total_sales: this.total_sales,
+                    total_returns: this.total_returns
+                }
+                data.closing_date_id = this.closingDays[this.closingDate]['id']
+                
+                axios.post("api/save-sales-returns", data)
+                .then(response => {
+                    Vue.notify({
+                        group: 'foo',
+                        title: 'Closings and Expenses',
+                        text: "Saved Successfully!",
+                        type: 'success',
+                        duration: 2000,
+                        speed: 1000
+                    });
+                    //if (closingDayExists) {
+                    //}
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                      this.errors = error.response.data.errors || {};
+                    }
+                });
+            },
+
+            printExpense() {
+                if(!this.closingDayExists) {
+                    return;
+                }
+                let id = this.closingDays[this.closingDate]['id'];
+
+                axios.get(`api/print-closing/${id}`)
+                .then(response => {
+                    Vue.notify({
+                        group: 'foo',
+                        title: 'Printed Successfully',
+                        text: "Closings printed Successfully",
+                        type: 'success',
+                        duration: 2000,
+                        speed: 1000
+                    });
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                        this.errors = error.response.data.errors || {};
+                    }
+                });
+            },
+
+            calculateFigures() {
+                let total_sales = 0;
+                let total_returns = 0;
+                let d1 = new Date(this.closingDate);
+
+                _.forEach(this.invoices, (invoice, key) => {
+                    let d2 = new Date(invoice.created_at);
+
+                    if (d2.toLocaleDateString() == d1.toLocaleDateString()) {
+                        if (invoice.type == "Sale") {
+                            total_sales = parseFloat(invoice.grand_total) + total_sales;         
+                        } else {
+                            total_returns = parseFloat(invoice.grand_total) + total_returns;
+                        }
+                    }
+                });
+                this.total_sales = total_sales;
+                this.total_returns = total_returns;
+            },
+
+            getExpenses() {
+                axios.get(`api/expense`)
+                .then(response => {
+                    this.closingDays = response.data;
+                    setTimeout(() => {
+                        this.fetchExpenses(); 
+                    }, 1000);
+                              
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                      this.errors = error.response.data.errors || {};
+                    }
+                });
+            },
+
+            fetchExpenses() {
+                this.deletedExpenses = [];
+                this.closingDayExists = false;
+                if (this.closingDays[this.closingDate]) {
+                    console.log("I'm in at1");
+                    this.closingDayExists = true;
+                    let savedDay = this.closingDays[this.closingDate];
+                    if (this.total_returns != savedDay['total_returns'] || this.total_sales != savedDay['total_sales']) {
+                        this.saveSalesReturn();
+                    }
+                    this.expenses = savedDay['expenses'];
+                    this.closing_cash = savedDay['closing_cash'];
+                }
+            },
+
+            changedClosingDate() {
+                this.total_sales = 0;
+                this.total_returns = 0;
+                this.total_expenses = 0;
+                this.expenses = [];
+                this.closing_cash = 0;
+                this.calculateFigures();
+                this.fetchExpenses();
+            },
         }
     }
 </script>

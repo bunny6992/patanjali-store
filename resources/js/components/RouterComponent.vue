@@ -37,10 +37,18 @@
                 this.file = this.$refs.file.files[0];
             },
 
-            getInvoices() {
-                if (this.$refs.invoicer) {
+            getInvoices(getExpenses = false) {
+
+                if (getExpenses) {
+                    this.$parent.route = "expenses";
+                } else {
+                    this.$parent.route = "invoices";
+                }
+                if (this.$refs.invoicer && this.$parent.route == "expenses") {
+                    let route = this.$parent.route;
                     this.$refs.invoicer.resetData();
-                    this.$refs.invoicer.getInvoices();
+                    this.$refs.invoicer.getInvoices(route);
+                    this.$refs.invoicer.getExpenses();
                 }
             },
 

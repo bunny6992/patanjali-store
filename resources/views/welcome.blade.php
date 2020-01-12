@@ -581,10 +581,14 @@ input:checked + .slider:before {
                                     <div class="card-body">
                                         <form  @submit.prevent="submit('bulkAddNewStock')">
                                             @csrf
-                                            <input class="form-control" type="file" id="file" ref="file" @change="handleFileUpload()">
+                                            <!-- <input class="form-control" type="file" id="file" ref="file" @change="handleFileUpload()"> -->
                                             <br>
+                                            <input class="form-control" type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx" @change="myFunction($event)">
+                                            </br></br>
+                                            <label id="jsonObject"> JSON : </label>
                                             <button class="btn btn-success">Import New Products</button>
                                         </form>
+                                        <button class="btn btn-success">Convert</button>
                                     </div>
                                 </div>
                             </div>
@@ -599,5 +603,6 @@ input:checked + .slider:before {
             </router-component>
         </div>
         <script src="js/app.js"></script>
+        <script src="js/xlsx.full.min.js"></script>
     </body>
 </html>

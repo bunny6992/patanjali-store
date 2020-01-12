@@ -125,8 +125,8 @@ input:checked + .slider:before {
                             <a style="font-size: x-large;">Sales</a>
                             <div class="dropdown-content">
                                 <a href="#" @click="getInvoicer()">Sale</a>
-                                <a href="#" @click="getInvoices()">Invoices</a>
-                                <a href="#" @click="getInvoices(true)">Expenses and Closing</a>
+                                <a href="#" @click="getInvoices('false')">Invoices</a>
+                                <a href="#" @click="getInvoices('true')">Expenses and Closing</a>
                             </div>
                         </div>
                         <div class="dropdown" style="margin-left: 2%;">
@@ -574,21 +574,22 @@ input:checked + .slider:before {
                         <div class="m-b-md" style="font-size: 16px;" v-else-if="route === 'addNewProducts'">
                             
                             <div class="container">
-                                <div class="card bg-light mt-3">
+                                <div class="card bg-light mt-4">
                                     <div class="card-header">
                                         Hey Sexy, Hope you are having a great day!
                                     </div>
                                     <div class="card-body">
-                                        <form  @submit.prevent="submit('bulkAddNewStock')">
+                                        <form @submit.prevent="bulkAddNewStock()">
                                             @csrf
                                             <!-- <input class="form-control" type="file" id="file" ref="file" @change="handleFileUpload()"> -->
                                             <br>
                                             <input class="form-control" type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx" @change="myFunction($event)">
                                             </br></br>
                                             <label id="jsonObject"> JSON : </label>
+                                            <v-client-table :data="newProducts" :columns="columns" :options="options">
+                                            </v-client-table>
                                             <button class="btn btn-success">Import New Products</button>
                                         </form>
-                                        <button class="btn btn-success">Convert</button>
                                     </div>
                                 </div>
                             </div>

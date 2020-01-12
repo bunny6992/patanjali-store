@@ -202,9 +202,6 @@
             },
 
             onSearch(search, loading) {
-
-                //loading(true);
-                //this.search(loading, search, this);
                 
                 if (this.timer) {
                     clearTimeout(this.timer);
@@ -549,9 +546,9 @@
                 });
             },
 
-            getInvoices(route = 'sale') {
-                this.$parent.route = route;
-                if (this.getInvFlag) {
+            getInvoices(route) {
+                // this.$parent.route = route;
+                // if (this.getInvFlag) {
                     axios.get("api/invoice")
                     .then(response => {
                         this.invoices = response.data;
@@ -561,7 +558,7 @@
                             this.errors = error.response.data.errors || {};
                         }
                     });
-               }
+               // }
             },
 
             printBill(id) {

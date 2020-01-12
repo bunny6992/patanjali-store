@@ -4,7 +4,22 @@
             return {
             	route: 'sale',
                 file: '',
-                bulkUpdate: false
+                bulkUpdate: false,
+                newProducts: [],
+                columns: [
+                    'Product Name',
+                    'Bar Code',
+                    'HSN/SAC',
+                    'SAP Item Code',
+                    'Tax',
+                    'Qty',
+                    'Cost Price',
+                    'MRP',
+                ],
+                options:{
+                    sortable: ['Product Name', 'Bar Code'],
+                    filterable: false,
+                },
             }
         },
         
@@ -36,17 +51,16 @@
             myFunction(evt){
             var selectedFile = evt.target.files[0];
             var reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = (event) => {
                 var data = event.target.result;
                 var workbook = XLSX.read(data, {
                     type: 'binary'
                 });
-                workbook.SheetNames.forEach(function(sheetName) {
+                workbook.SheetNames.forEach((sheetName) => {
 
                     var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
                     var json_object = JSON.stringify(XL_row_object);
-                    document.getElementById("jsonObject").innerHTML = json_object;
-
+                    this.newProducts = JSON.parse(json_object);
                 })
             };
 
@@ -61,18 +75,19 @@
                 this.file = this.$refs.file.files[0];
             },
 
-            getInvoices(getExpenses = false) {
+            getInvoices(getExpenses) {
 
-                if (getExpenses) {
-                    this.$parent.route = "expenses";
+                if (getExpenses == 'true') {
+                    this.route = "expenses";
                 } else {
-                    this.$parent.route = "invoices";
+                    this.route = "invoices";
                 }
-                if (this.$refs.invoicer && this.$parent.route == "expenses") {
-                    let route = this.$parent.route;
+                if (this.$refs.invoicer && this.route == "expenses") {
                     this.$refs.invoicer.resetData();
-                    this.$refs.invoicer.getInvoices(route);
+                    this.$refs.invoicer.getInvoices(this.route);
                     this.$refs.invoicer.getExpenses();
+                } else if (this.$refs.invoicer && this.route == "invoices") {
+                    this.$refs.invoicer.getInvoices(this.route);
                 }
             },
 

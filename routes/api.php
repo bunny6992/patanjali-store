@@ -21,6 +21,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::get('get-items/{query}', 'Api\ApiController@getItems');
 Route::get('get-all-items', 'Api\ApiController@getAllItems');
+
+Route::post('bulk-add-products', 'Api\ApiController@bulkAddProducts');
+Route::post('bulk-update-products', 'Api\ApiController@bulkUpdateProducts');
+
 Route::resource('invoice', 'Api\InvoiceController');
 Route::resource('expense', 'Api\ExpenseController');
 Route::post('save-sales-returns', 'Api\ExpenseController@saveSalesReturn');

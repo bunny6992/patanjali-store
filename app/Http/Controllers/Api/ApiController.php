@@ -59,8 +59,10 @@ class ApiController extends Controller
                 $returnProduct = [
                     'product_id' => $product->id,
                     'batch_id' => $batch->id,
-                    'name' => $product->name,
-                    'tax' => $product->tax,
+                    'name' => $product->style_name,
+                    'for' => $product->for,
+                    'size' => $product->size,
+                    'color' => $product->color,
                     'mrp' => $batch->mrp,
                     'qty' => $batch->qty,
                     'avg_cost' => $batch->avg_cost,
@@ -100,5 +102,56 @@ class ApiController extends Controller
         $closingModel->save();
 
         return ;
+    }
+
+    public function bulkAddProducts(Request $request)
+    {
+        $requestData = $request->all();
+        foreach ($requestData as $newProduct) {
+
+            $product = Product::where('barcode', $newProduct['Barcode'])->first();
+            if (!empty($product)) {
+                continue;
+            }
+            $product = new Product;
+            $product->style_name = (string)$newProduct['Style Name'];
+            $product->barcode = (string)$newProduct['Barcode'];
+            $product->for = (string)$newProduct['FOR'];
+            $product->size = (string)$newProduct['Size'];
+            $product->color = (string)$newProduct['Color'];
+            $product->save();
+            $batchRate = $newProduct['Cost Price'];
+            $batchMrp = $newProduct['MRP'];
+            $batchQty = $newProduct['QTY'];
+
+            $batches = Batch::where('product_id', $product->id)->get();
+            $batchFlag = false;
+
+            if (!empty($batches)) {
+                foreach ($batches as $BatchId => $batch) {
+                    if ($batchMrp == $batch['mrp']) {
+                        $batch['avg_cost'] = (($batch['avg_cost'] * $batch['qty']) + ($batchRate * $batchQty)) / ($batch['qty'] + $batchQty);
+                        $batch['qty'] += intval($batchQty);
+                        $batchFlag = true;
+                        $batch->save();
+                        break;
+                    }
+                }
+            }
+
+            if(!$batchFlag) {
+                $batch = new Batch;
+                $batch->product_id = $product->id;
+                $batch->avg_cost = $batchRate;
+                $batch->mrp = $batchMrp;
+                $batch->qty = $batchQty;
+                $batch->save();
+            }
+        }
+    }
+
+    public function bulkUpdateProducts(Request $request)
+    {
+        return $request->all();
     }
 }

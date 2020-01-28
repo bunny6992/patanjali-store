@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Batch;
 use App\Product;
-use App\Invoice;
-use App\InvoiceItem;
+use App\Sale;
+use App\Customer;
+use App\SalesItem;
 use App\DailyClosing;
 use App\Expense;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
@@ -24,7 +25,7 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $returnData = Invoice::orderBy('id','DESC')->get();
+        $returnData = Sale::orderBy('id','DESC')->get();
         return $returnData;
     }
 
@@ -48,7 +49,7 @@ class InvoiceController extends Controller
     {
         $requestData = $request->all();
         $billItems = $requestData['billItems'];
-        $invoice = new Invoice;
+        $invoice = new Sale;
         $invoice->products_count = count($billItems);
         $invoice->total = $requestData['billTotal'];
         $invoice->grand_total = $requestData['grandTotal'];
@@ -56,19 +57,18 @@ class InvoiceController extends Controller
         $invoice->discount_percent =  $requestData['discPercent'];
         $invoice->type = $requestData['type'];
         $invoice->payment_mode = $requestData['paymentMode'];
-        $invoice->recharge_amount = $requestData['rechargeAmt'];
+        $invoice->customer_name = $requestData['customer_name'];
         $invoice->save();
 
         $totalCost = 0;
         foreach ($billItems as $id => $item) {
             $product = Product::find($item['product_id']);
             $batch = Batch::find($item['batch_id']);
-            $invoiceItem = new InvoiceItem;
-            $invoiceItem->invoice_id = $invoice->id;
+            $invoiceItem = new SalesItem;
+            $invoiceItem->sales_id = $invoice->id;
             $invoiceItem->product_id = $product->id;
             $invoiceItem->batch_id = $batch->id;
-            $invoiceItem->name = $product->name;
-            $invoiceItem->tax = $product->tax;
+            $invoiceItem->name = $product->style_name;
             $invoiceItem->mrp = $batch->mrp;
             $invoiceItem->avg_cost = $batch->avg_cost;
             $invoiceItem->qty = $item['qty'];
@@ -91,8 +91,23 @@ class InvoiceController extends Controller
         }
         $invoice->total_cost = $totalCost;
         $invoice->profit = $requestData['grandTotal'] - $totalCost;
+
+        if (!empty($requestData['customer_name']) && !empty($requestData['phone'])) {
+            $customer = Customer::where('phone', $requestData['phone'])->first();
+            
+            if (count($customer) == 0) {
+                $customer = new Customer;
+            }
+            $customer->name = $requestData['customer_name'];
+            $customer->phone = $requestData['phone'];
+            $customer->save();
+            $invoice->customer_id = $customer->id;
+            $invoice->customer;
+        }
+
         $invoice->save();
         $invoiceItems = [];
+
         $invoice->invoiceItems;
         $returnData = [
             'invoice' => $invoice,
@@ -109,9 +124,11 @@ class InvoiceController extends Controller
      */
     public function show($id)
     {
-        $returnData = Invoice::find($id);
-        foreach ($returnData->invoiceItems as $key => $value) {
-            $value->return_qty = 0;
+        $returnData = Sale::find($id);
+        foreach ($returnData->salesItems as $key => $value) {
+            $product = Product::find($value['product_id']);
+            $value->color = $product->color;
+            $value->size = $product->size;
         }
         
         return $returnData;

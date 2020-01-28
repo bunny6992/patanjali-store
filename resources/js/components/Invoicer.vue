@@ -36,24 +36,26 @@
                 unsavedInvoices: [],
                 invoice_date: '',
                 invoice_id: 10,
+                customerName: "",
+                phone: "",
                 invoiceType: 'Sale',
                 invoice_columns: [
                     'id',
+                    'type',
+                    'customer_name',
                     'created_at',
+                    'payment_mode',
                     'products_count',
                     'total',
-                    'discount',
                     'grand_total',
-                    'payment_mode',
-                    'type',
-                    'view',
-                    'print'
+                    'view'
                 ],
                 table_options:{
                     sortable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
-                    filterable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
+                    filterable: false,
                     headings: {
                         id: 'Invoice Id',
+                        name: 'Customer Name',
                         created_at: 'Date',
                         products_count: 'No of Items',
                         type: 'Invoice Type'
@@ -85,6 +87,13 @@
         computed: {
             expected_closing_cash() {
                 return this.total_sales - this.total_returns - this.totalExpenses;
+            },
+
+            invoiceHeight() {
+                if (this.billItems.length > 14) {
+                    return 2500;
+                }
+                return 1000;
             },
 
             totalExpenses() {
@@ -245,43 +254,34 @@
                 if (search.length == 0) {
                     query = this.$refs.test._data._value;
                 }
-                let products = this.allItems;
-                // let products = [];
-                // _.forEach(this.allItems, (item) => {
-                //     let tempName = item.name.toLowerCase();
-                //     tempName += item.barcode;
-                //     if (tempName.search(query.toLowerCase()) > 0) {
-                //         products.push(item);
-                //     }
-                // });
+                //let products = this.allItems;
+                let products = [];
+                _.forEach(this.allItems, (item) => {
+                    // let tempName = item.name.toLowerCase();
+                    // tempName += item.barcode;
+                    if (item.barcode.toLowerCase() == query.toLowerCase()) {
+                        products.push(item);
+                    }
+                });
 
                 vm.options = [];
                 this.selectFlag = false;
                 this.itemOptions = [];
                 if (products.length == 0) {
-                    vm.options.push("I got nothing here Man!");
-                    this.selectFlag = true;
-                    Vue.notify({
-                        group: 'foo',
-                        title: 'What you  doing bro!',
-                        text: 'I got nothing here!',
-                        type: 'error',
-                        duration: 3000,
-                        speed: 1000
-                    });
-                    this.focusOnSearch();
-                    return;
+                   products = this.allItems;
                 }
 
                 if (products.length > 1) {
                     _.forEach(products, (value, key) => {
-                        vm.options.push(value.name + " MRP-" + value.mrp);
+                        vm.options.push(value['for'] + " " + value.name + " " + value.color + " " + value.size + " " +" MRP-" + value.mrp);
                         this.itemOptions.push({
-                            id: value.name + " MRP-" + value.mrp,
+                            id: value['for'] + " " + value.name + " " + value.color + " " + value.size + " " +" MRP-" + value.mrp,
                             product_id: value.product_id,
                             batch_id: value.batch_id,
                             name: value.name,
                             mrp: value.mrp,
+                            size: value.size,
+                            color: value.color,
                             qty_avl: parseInt(value.qty),
                             tax: value.tax,
                         });
@@ -292,10 +292,11 @@
                     vm.options.push(products[0].name + " MRP-" + products[0].mrp);
                     this.$refs.test._data._value = products[0].name + " MRP-" + products[0].mrp;
                     this.newItem = {
-                        id: products[0].name + " MRP-" + products[0].mrp,
+                        id: products[0]['for'] + " " + products[0].name + " " + products[0].color + " " + products[0].size + " " +" MRP-" + products[0].mrp,
                         name: products[0].name,
                         mrp: products[0].mrp,
-                        tax: products[0].tax,
+                        size: products[0].size,
+                        color: products[0].color,
                         cost_price: 0,
                         qty_avl: parseInt(products[0].qty),
                         product_id: products[0].product_id,
@@ -398,7 +399,8 @@
                                 id: item.name + " MRP-" + item.mrp,
                                 name: item.name,
                                 mrp: item.mrp,
-                                tax: item.tax,
+                                size: item.size,
+                                color: item.color,
                                 product_id: item.product_id,
                                 qty_avl: item.qty_avl,
                                 batch_id: item.batch_id,
@@ -505,13 +507,73 @@
                 data.discAmt = this.discAmt;
                 data.discPercent = this.discPercent;
                 data.paymentMode = this.paymentMode;
+                data.customer_name = this.customerName;
+                data.phone = this.phone;
+                data.type = this.invoiceType;
+                axios.post("api/invoice", data)
+                .then(response => {
+                    let invoice = response.data;
+                    this.invoice_id = invoice.invoice.id;
+                    this.invoice_date = this.formatDate(invoice.invoice.created_at); 
+                    Vue.notify({
+                        group: 'foo',
+                        title: 'Yay!',
+                        text: 'Saved Successfully!',
+                        type: 'success',
+                        duration: 3000,
+                        speed: 1000
+                    });
+
+                    if (printBill) {
+                        setTimeout(() => {
+                            this.printBill('printMeNew');
+                        }, 250);
+                        
+                    }
+
+                    this.getInventory();
+                    setTimeout(() => {
+                        this.resetSearch();
+                        this.invoiceType = 'Sale';
+                        this.itemOptions = [];
+                        this.customerName = "";
+                        this.phone = "";
+                        this.newItem = {};
+                        this.billItems = [];
+                        this.selectFlag = false;
+                        this.makeRequest = true;
+                        this.discAmt = null;
+                        this.discPercent = null;
+                        this.paymentMode = "Cash";
+                    }, 500);
+                    
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                        this.errors = error.response.data.errors || {};
+                    }
+                });
+            },
+
+            saveBill2(printBill = false) {
+
+                if (!this.validateData()) {
+                    return;
+                }
+
+                let data = {};
+                data.billItems = this.billItems;
+                data.billTotal = this.billTotal;
+                data.grandTotal = this.grandTotal;
+                data.discAmt = this.discAmt;
+                data.discPercent = this.discPercent;
+                data.paymentMode = this.paymentMode;
                 data.rechargeAmt = this.rechargeAmt;
                 data.type = this.invoiceType;
                 axios.post("api/invoice", data)
                 .then(response => {
                     let invoice = response.data;
                     this.invoice_id = invoice.invoice.id;
-                    this.invoice_date = invoice.invoice.created_at;
+                    this.invoice_date = this.formatDate(invoice.invoice.created_at);
                     Vue.notify({
                         group: 'foo',
                         title: 'Yay!',
@@ -530,6 +592,8 @@
                         this.resetSearch();
                         this.invoiceType = 'Sale';
                         this.itemOptions = [];
+                        this.customerName = "";
+                        this.phone = "";
                         this.newItem = {};
                         this.billItems = [];
                         this.selectFlag = false;
@@ -561,7 +625,7 @@
                // }
             },
 
-            printBill(id) {
+            printBill2(id) {
                 axios.get(`api/print-invoice/${id}`)
                     .then(response => {
                         Vue.notify({
@@ -577,6 +641,11 @@
                             this.errors = error.response.data.errors || {};
                         }
                     });
+            },
+
+            printBill(id) {
+                console.log($(document.getElementById("printStatement")).html());
+                this.Popup($(document.getElementById(id)).html());
             },
 
             Popup(data) {
@@ -606,13 +675,14 @@
                 axios.get(`api/invoice/${id}`)
                 .then(response => {
                     let invoice =  response.data;
-                    this.billItems = invoice.invoice_items;
+                    this.billItems = invoice.sales_items;
                     this.discPercent = invoice.discount_percent;
                     this.discAmt = invoice.discount;
                     this.grand_total = invoice.grand_total;
                     this.invoice_id = invoice.id;
-                    this.invoice_date = invoice.created_at;   
-                    this.invoiceType = invoice.type;   
+                    this.invoice_date = this.formatDate(invoice.created_at);   
+                    this.invoiceType = invoice.type;
+                    this.customerName = invoice.customer_name;   
                     this.paymentMode = invoice.payment_mode;
                     this.rechargeAmt = invoice.recharge_amount;             
                 }).catch(error => {
@@ -626,6 +696,8 @@
                 // setTimeout(() => {
                     //Object.assign(this.$data, this.$options.data());
                     this.billItems = [];
+                    this.customerName = "";
+                    this.phone = "";
                     this.applyTax = false;
                 // },2000);
                 
@@ -830,6 +902,19 @@
                 this.calculateFigures();
                 this.fetchExpenses();
             },
+
+            formatDate(date) {
+                var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                let newDate = new Date(date);
+                return newDate.getDate() + "-" +  months[newDate.getMonth()] + "-" + newDate.getFullYear();
+            },
+
+            printExpenses() {
+                this.getExpenses();
+                setTimeout(() => {
+                    this.printBill("printStatement");
+                }, 1000);
+            }
         }
     }
 </script>

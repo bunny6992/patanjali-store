@@ -4,13 +4,37 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+        <title>M I S F I T</title>
 
         <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
+        <!-- <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet"> -->
+        <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Amatic+SC" /> -->
         <link href="css/app.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="{{ asset('fontawesome/css/all.css') }}">
         <style type="text/css">
+/*@font-face {
+    font-family: 'Amatic SC';
+    src: url('{{ public_path('fonts/misfitBold.tff') }}');
+}*/
+* {
+  font-family: 'Amatic SC';
+  font-size: 32px;
+  font-weight: bold;
+}
+/*@font-face {
+    font-family: "Amatic SC";
+    src: url('{{ public_path('fonts/misfit.tff') }}');
+}*/
+
+
+        </style>
+        <style type="text/css">
+.test {
+    font-weight: bold;
+    font-size: 32px;
+}
+
+
             input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
     -webkit-appearance: none;
@@ -107,7 +131,7 @@ input:checked + .slider:before {
         <div id="app">
             <router-component inline-template>
                 <div>
-                    <div style="width: 100%; background: powderblue; height: 60px; color: white;">
+                    <div style="width: 100%; background: #fdd325; height: 60px; color: white;">
                         <!-- @if (Route::has('login'))   
                         <div class="top-right links">
                             @auth
@@ -122,7 +146,7 @@ input:checked + .slider:before {
                         </div>
                         @endif    -->
                         <div class="dropdown" style="margin-left: 2%; margin-top: 0.4%;">
-                            <a style="font-size: x-large;">Sales</a>
+                            <a>Sales</a>
                             <div class="dropdown-content">
                                 <a href="#" @click="getInvoicer()">Sale</a>
                                 <a href="#" @click="getInvoices('false')">Invoices</a>
@@ -130,13 +154,16 @@ input:checked + .slider:before {
                             </div>
                         </div>
                         <div class="dropdown" style="margin-left: 2%;">
-                            <a style="font-size: x-large;">Inventory</a>
+                            <a>Inventory</a>
                             <div class="dropdown-content">
                                 <a href="#" @click="route = 'stockList'">Stock List</a>
                                 <a href="#" @click="route = 'updateStock'">Update Stock</a>
                                 <a href="#" @click="route = 'addNewProducts'">Add New Products</a>
                             </div>
-                        </div>          
+                        </div>
+                        <!-- <div>
+                            <img style="position: relative; bottom: 89px; margin-left: 40%; height: 170px; width: 255px;" src="images/logo-name-black.svg" alt="Logo"><br>
+                        </div>    -->       
                     </div>
 
                     <div class="content" style="margin-top: 0.7%;">
@@ -152,16 +179,17 @@ input:checked + .slider:before {
                                                 <a slot="view" slot-scope="props" class="fa fa-expand-arrows-alt" @click="editInvoice(props.row.id)" style="cursor: pointer;"></a>
                                                 <a slot="print" slot-scope="props" class="fa fa-print" @click="printBill(props.row.id)" style="cursor: pointer;"></a>
                                             </v-client-table>
-                                            <modal name="showInvoice" height="auto" width="75%" style="font-size: 18px; text-align: center;">
+                                            <modal name="showInvoice" height="auto" width="75%" style="overflow-y: auto; font-size: 32px; font-weight: bold; text-align: center;">
                                                 
                                                 <table class="table">
                                                     <thead class="thead-dark">
                                                         <tr>
                                                             <th scope="col">Sr No</th>
-                                                            <th scope="col">Product</th>
-                                                            <th scope="col">Tax</th>
-                                                            <th scope="col">Price Incl. Tax</th>
-                                                            <th scope="col">Qty</th>
+                                                            <th scope="col">Style Name</th>
+                                                            <th scope="col">Color</th>
+                                                            <th scope="col">Size</th>
+                                                            <th scope="col">How Much</th>
+                                                            <th scope="col">How Many</th>
                                                             <th scope="col">Amount</th>
                                                         </tr>
                                                     </thead>
@@ -169,7 +197,8 @@ input:checked + .slider:before {
                                                         <tr v-for="(item, index) in billItems">
                                                             <th scope="row">@{{ index + 1 }}</th>
                                                             <td>@{{ item.name }}</td>
-                                                            <td>@{{ item.tax }}%</td>
+                                                            <td>@{{ item.color }}</td>
+                                                            <td>@{{ item.size }}</td>
                                                             <td>@{{ item.mrp }}</td>
                                                             <td>@{{ item.qty }}</td>
                                                             <td>@{{ item.mrp * item.qty }}</td>
@@ -213,12 +242,114 @@ input:checked + .slider:before {
                                                     </thead>
                                                 </table>
                                                 <div class="row" style="font-size: x-large; color: white; text-align: center; cursor: pointer;">
-                                                    <div @click="$modal.hide('showInvoice')" class="col-md-6" style="background-color: indianred">
+                                                    <div @click="$modal.hide('showInvoice')" class="col-md-6" style="background-color: #abd0e8">
                                                         Cancel
                                                     </div>
-                                                    <div @click="printBill(invoice_id)" class="col-md-6" style="background-color: darkseagreen">
+                                                    <!-- <div @click="printBill(invoice_id)" class="col-md-6" style="background-color: #fdd325">
+                                                        Print
+                                                    </div> -->
+                                                    <div @click="printBill('printMe')" class="col-md-6" style="background-color: #fdd325">
                                                         Print
                                                     </div>
+                                                </div>
+
+                                                <div id="printMe" hidden>
+                                                    <div class="row" style="font-size: 28px; margin-top: 0.5%; margin-bottom: 0.5%">
+                                                        <div class="col-md-3" style="text-align: center; font-weight: bold;"><br>
+                                                            <span v-if="invoiceType == 'Return'" style="font-size: 32px; font-weight: bold;">Return</span><br>&nbsp;
+                                                            <span style="font-size: 32px; font-weight: bold;">
+                                                                Invoice No. &nbsp; @{{ invoice_id }}<br>
+                                                                <span v-if="customerName">
+                                                                    &nbsp;FOR: &nbsp; @{{ customerName }}
+                                                                </span>
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6" style="text-align: center; font-weight: bold;">
+                                                            <img src="images/logo-name-black.svg" alt="Logo" height="140px" width="200px"><br>
+                                                            <img src="images/name-address.svg" alt="Logo" height="120px" width="360px">
+                                                            <!-- <div class="test">
+                                                                Misfit Style,<br>
+                                                                Bhim Chowk, Jaripatka, Nagpur-440014 <br>
+                                                                Ph: 9595034566
+                                                            </div> -->
+                                                        </div>      
+                                                        <div class="col-md-3" style="font: cursive; font-size: 32px; font-weight: bold;"><br><br>
+                                                            @{{ invoice_date }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="font-size: 32px; height: 1000px" v-bind:style="{ 'min-height': invoiceHeight + 'px' }">
+                                                        <div class="col-md-12">
+                                                            <table class="table">
+                                                                <thead style="font-size: 32px; text-align: center;">
+                                                                    <tr>
+                                                                        <th scope="col">Sr. No.</th>
+                                                                        <th scope="col">Style Name</th>
+                                                                        <th scope="col">Color</th>
+                                                                        <th scope="col">Size</th>
+                                                                        <th scope="col">MRP</th>
+                                                                        <th scope="col">Qty</th>
+                                                                        <th scope="col">Amount</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody style="font-size: 32px; text-align: center;">
+                                                                    <tr v-for="(item, index) in billItems">
+                                                                        <th scope="row">@{{ index + 1 }}</th>
+                                                                        <th scope="row">@{{ item.name }}</th>
+                                                                        <th scope="row">@{{ item.color }}</th>
+                                                                        <th scope="row">@{{ item.size }}</th>
+                                                                        <th scope="row">@{{ item.mrp }}</th>
+                                                                        <th scope="row">@{{ item.qty }}</th>
+                                                                        <th scope="row">@{{ item.mrp * item.qty }}</th>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <table class="table" style="font-size: 32px;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">
+                                                                        </th>
+                                                                        <th scope="col"></th>
+                                                                        <th scope="col">
+                                                                            <span v-if="discPercent">
+                                                                                <span>Disc %:&nbsp;&nbsp;</span>
+                                                                                <span>@{{ discPercent }}</span>
+                                                                            </span>
+                                                                        </th>
+                                                                        <th scope="col">
+                                                                            <span v-if="discAmt">
+                                                                                <span>Disc Amt:&nbsp;&nbsp;</span>
+                                                                                <span>@{{ discAmt }}</span>
+                                                                            </span>
+                                                                        </th>
+                                                                        <th scope="col" style="width: 30%;">
+                                                                            <span>Grand Total:&nbsp;&nbsp;</span>
+                                                                            <span style="font-size: 42px;">@{{ grand_total }}</span>
+                                                                        </th>
+                                                                    </tr>
+                                                                </thead>
+                                                            </table>                                                    
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="font: cursive; text-align: center; font-size: 32px; font-weight: bold;">
+                                                        <div class="col-sm-3"></div>
+                                                        <div class="col-sm-1" style="text-align: left;">
+                                                            <img style="position: relative; left: 60px;" src="images/gs2.svg" alt="Logo" height="100px" width="75px">
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            It was great to see you<br>!! Do visit again !!
+                                                        </div>
+                                                        <div class="col-sm-1" style="text-align: left;">
+                                                            <img style="position: relative; right: 70px;" src="images/gs1.svg" alt="Logo" height="100px" width="75px">
+                                                        </div>
+                                                        <div class="col-sm-3"></div>
+                                                    </div>
+                                                    <!-- <img style="position: relative; bottom: 95px; margin-left: 48px;" src="images/smiley.svg" alt="Logo" height="100px" width="150px"><br>
+                                                    <img style="position: relative; bottom: 196px; margin-left: 388px;" src="images/smiley.svg" alt="Logo" height="100px" width="150px"><br> -->
                                                 </div>
 
                                             </modal>
@@ -254,12 +385,12 @@ input:checked + .slider:before {
                                 
                                 <div class="m-b-md" style="font-size: 18px;" v-else-if="$parent.route == 'expenses'">
                                     <div style="font-size: 65px;">Expenses and Daily Closing</div>
-                                    <b>Select Date:&nbsp;&nbsp;</b> <input type="date" name="" @change="changedClosingDate" v-model="closingDate">
+                                    <b>Select Date:&nbsp;&nbsp;</b> <input type="date" name="" @change="changedClosingDate" style="font-size: 32px;" v-model="closingDate">
                                     <div class="row">
                                         <div class="col-md-1">
                                         </div>
                                         <div class="col-md-4">
-                                            <div style="font-size: 28px; text-align: left;">
+                                            <div style="font-size: 32px; text-align: left;">
                                                 <p>Sales:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="total_sales"></span>
                                                 </p>
                                                 <p>Returns:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="total_returns"></span>
@@ -271,7 +402,7 @@ input:checked + .slider:before {
                                                 <div class="row">
                                                     <div class="col-md-4">Closing Cash:</div>
                                                     <div class="col-md-5">
-                                                        <input style="font-size:22px; width: 50%; margin: auto;" class="form-control" type="number" name="" v-model="closing_cash">
+                                                        <input style="font-size:32px; width: 50%; margin: auto;" class="form-control" type="number" name="" v-model="closing_cash">
                                                     </div>
                                                      <div class="col-md-3"></div>
                                                 </div>
@@ -292,25 +423,53 @@ input:checked + .slider:before {
                                                     <tr v-for="(expense, index) in expenses">
                                                         <th scope="row">@{{ index + 1 }}</th>
                                                         <td>
-                                                            <input class="form-control" type="text" name="" v-model="expense.remark">
+                                                            <input class="form-control" type="text" name="" v-model="expense.remark" style="font-size: 32px;">
                                                         </td>
                                                         <td>
-                                                            <input style="width: 30%; margin: auto;" class="form-control" type="number" name="" v-model="expense.amount">
+                                                            <input style="width: 60%; margin: auto;" class="form-control" type="number" name="" v-model="expense.amount" style="font-size: 32px;">
                                                         </td>
                                                         <td><i @click="removeExpense(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                            <i style="cursor: pointer; color: cornflowerblue; font-size: 22px;" class="fas fa-plus-circle" @click="addExpense()"> Add Expense</i>
+                                            <i style="cursor: pointer; color: #fdd325; font-size: 32;" class="fas fa-plus-circle" @click="addExpense()"> Add Expense</i>
                                         </div>
                                         <div class="col-md-1">
                                         </div>
                                     </div>
-                                    <span style="font-size: 22px; margin:20px; cursor: pointer; padding: 12px; background-color: seagreen; color: white;" @click="saveExpense()">Save</span>
-                                    <span style="font-size: 22px; margin:20px; cursor: pointer; padding: 12px; background-color: seagreen; color: white;" @click="printExpense()">Print</span>
+                                    <span style="font-size: 32px; margin:20px; cursor: pointer; padding: 12px; background-color: #fdd325; color: white;" @click="saveExpense()">Save</span>
+                                    <span style="font-size: 32px; margin:20px; cursor: pointer; padding: 12px; background-color: #fdd325; color: white;" @click="printExpenses()">Print</span>
+
+                                    <div hidden>
+                                    <!-- SOURCE -->
+                                        <div id="printStatement">
+                                            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+                                            <div class="row" style="font-size: 28px;">
+                                                <div class="col-md-3">
+                                                </div>
+                                                <div class="col-md-6" style="text-align: center; font-weight: bold;">
+                                                    <img src="images/logo-name-black.svg" alt="Logo" height="140px" width="200px">
+                                                </div>
+                                            </div>
+                                            <div style="font-size: 32px; text-align: center;">
+                                                <p>Statement Date:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="closingDate"></span>
+                                                </p>
+                                                <p>Sales:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="total_sales"></span>
+                                                </p>
+                                                <p>Returns:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="total_returns"></span>
+                                                </p>
+                                                <p>Total Expenses:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="totalExpenses"></span>
+                                                </p>
+                                                <p>Expected Closing Cash:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="expected_closing_cash"></span>
+                                                </p>
+                                                <p>Closing Cash:&nbsp;&nbsp;&nbsp;&nbsp;<span v-text="closing_cash"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
 
-                                <div style="font-size: 18px;" v-else="">                
+                                <div style="font-size: 32px;" v-else="">                
                                     <div class="row" style="margin-top: 0.8%; margin-bottom: 3%; margin-left: 8%;">
                                         <div class="col-md-2">
                                         </div>
@@ -324,21 +483,125 @@ input:checked + .slider:before {
                                                 </template>
                                             </v-select>
                                         </div>
-                                        <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
+                                        <button class="btn" style="background-color: #fdd325; color: white;"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
                                         <!-- <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button> -->
+                                    </div>
+
+                                    <div hidden>
+                                        <!-- SOURCE -->
+                                        <div id="printMeNew">
+                                            <div class="row" style="font-size: 28px; margin-top: 0.5%; margin-bottom: 0.5%">
+                                                <div class="col-md-3" style="text-align: center; font-weight: bold;"><br><br>
+                                                    <span v-if="invoiceType == 'Return'" style="font-size: 32px; font-weight: bold;">Return</span>
+                                                    <span style="font-size: 32px; font-weight: bold;">
+                                                        Invoice No. &nbsp; @{{ invoice_id }}<br>
+                                                        <span v-if="customerName">
+                                                            &nbsp;FOR: &nbsp; @{{ customerName }}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                                <div class="col-md-6" style="text-align: center; font-weight: bold;">
+                                                    <img src="images/logo-name-black.svg" alt="Logo" height="140px" width="200px"><br>
+                                                    <img src="images/name-address.svg" alt="Logo" height="120px" width="360px">
+                                                </div>      
+                                                <div class="col-md-3" style="font: cursive; font-size: 32px; font-weight: bold;"><br><br>
+                                                    @{{ invoice_date }}
+                                                </div>
+                                            </div>
+                                            <div class="row" style="font-size: 32px; height: 1000px" v-bind:style="{ height: invoiceHeight + 'px' }">
+                                                <div class="col-md-12">
+                                                    <table class="table">
+                                                        <thead style="font-size: 32px; text-align: center;">
+                                                            <tr>
+                                                                <th scope="col">Sr. No.</th>
+                                                                <th scope="col">Style Name</th>
+                                                                <th scope="col">Color</th>
+                                                                <th scope="col">Size</th>
+                                                                <th scope="col">MRP</th>
+                                                                <th scope="col">Qty</th>
+                                                                <th scope="col">Amount</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="font-size: 32px; text-align: center;">
+                                                            <tr v-for="(item, index) in billItems">
+                                                                <th scope="row">@{{ index + 1 }}</th>
+                                                                <th scope="row">@{{ item.name }}</th>
+                                                                <th scope="row">@{{ item.color }}</th>
+                                                                <th scope="row">@{{ item.size }}</th>
+                                                                <th scope="row">@{{ item.mrp }}</th>
+                                                                <th scope="row">@{{ item.qty }}</th>
+                                                                <th scope="row">@{{ item.mrp * item.qty }}</th>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <table class="table" style="font-size: 32px;">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">
+                                                                </th>
+                                                                <th scope="col"></th>
+                                                                <th scope="col">
+                                                                    <span v-if="discPercent">
+                                                                        <span>Disc %:&nbsp;&nbsp;</span>
+                                                                        <span>@{{ discPercent }}</span>
+                                                                    </span>
+                                                                </th>
+                                                                <th scope="col">
+                                                                    <span v-if="discAmt">
+                                                                        <span>Disc Amt:&nbsp;&nbsp;</span>
+                                                                        <span>@{{ discAmt }}</span>
+                                                                    </span>
+                                                                </th>
+                                                                <th scope="col" style="width: 30%;">
+                                                                    <span>Grand Total:&nbsp;&nbsp;</span>
+                                                                    <span style="font-size: 36px;">@{{ grandTotal }}</span>
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                    </table>                                                    
+                                                </div>
+                                            </div>
+                                            <div class="row" style="font: cursive; text-align: center; font-size: 32px; font-weight: bold;">
+                                                <div class="col-sm-3"></div>
+                                                <div class="col-sm-1" style="text-align: left;">
+                                                    <img style="position: relative; left: 60px;" src="images/gs2.svg" alt="Logo" height="100px" width="75px">
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    It was great to see you<br>!! Do visit again !!
+                                                </div>
+                                                <div class="col-sm-1" style="text-align: left;">
+                                                    <img style="position: relative; right: 70px;" src="images/gs1.svg" alt="Logo" height="100px" width="75px">
+                                                </div>
+                                                <div class="col-sm-3"></div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div id="billing-table" class="row" style="max-height: 60vh; overflow: scroll; overflow-x: hidden; width: 100%;">
                                         <div class="col-md-12">
+                                            <div style="margin-top: 40px; margin-bottom: 20px;">
+                                                <span>
+                                                    Customer Name:
+                                                    <input style="width: 30%" type="text" name="customer_name" v-model="customerName">
+                                                </span>
+                                                <span style="margin-left: 20px;">
+                                                    Ph:
+                                                    <input type="number" name="phone" v-model="phone">
+                                                </span>
+                                            </div>
                                             <table class="table">
                                                 <thead class="thead-dark">
                                                     <tr>
                                                         <th scope="col">Sr. No.</th>
-                                                        <th scope="col">Product</th>
-                                                        <th scope="col">Tax</th>
-                                                        <th scope="col">Price Incl. Tax</th>
-                                                        <th scope="col">Qty Available</th>
-                                                        <th scope="col">Qty</th>
+                                                        <th scope="col">Style Name</th>
+                                                        <th scope="col">Color</th>
+                                                        <th scope="col">Size</th>
+                                                        <th scope="col">How Much</th>
+                                                        <th scope="col">How Many</th>
                                                         <th scope="col">Amount</th>
                                                         <th scope="col">Actions</th>
                                                     </tr>
@@ -347,9 +610,9 @@ input:checked + .slider:before {
                                                     <tr v-for="(item, index) in billItems">
                                                         <th scope="row">@{{ index + 1 }}</th>
                                                         <td>@{{ item.name }}</td>
-                                                        <td>@{{ item.tax }}%</td>
+                                                        <td>@{{ item.color }}</td>
+                                                        <td>@{{ item.size }}</td>
                                                         <td>@{{ item.mrp }}</td>
-                                                        <td>@{{ item.qty_avl }}</td>
                                                         <td style="width: 10%;"><i @click="decreaseQty(item)" class="fas fa-minus-circle" style="font-size: 15px; cursor: pointer;"></i>  <input @input="qtyChanged($event.target.value, item)" type="number" name="qty" v-model="item.qty" style="width: 45%; text-align: center; border-radius: 10%;">  <i class="fas fa-plus-circle" style="font-size: 15px; cursor: pointer;" @click="increaseQty(item)"></i></td>
                                                         <td>@{{ item.mrp * item.qty }}</td>
                                                         <td><i @click="removeItem(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
@@ -367,12 +630,11 @@ input:checked + .slider:before {
                                                             <option disabled value="">Please select one</option>
                                                             <option>Cash</option>
                                                             <option>Paytm</option>
-                                                            <option>Patanjali Card</option>
+                                                            <option>Google Pay</option>
+                                                            <option>Phone Pay</option>
+                                                            <option>Credit Card</option>
+                                                            <option>Debit Card</option>
                                                         </select>
-                                                    </th>
-                                                    <th scope="col" v-if="paymentMode == 'Patanjali Card'">
-                                                        <span>Recharge Amt:&nbsp;&nbsp;</span>
-                                                        <input v-model="rechargeAmt" type="number" style="width: 14%; text-align: center;">
                                                     </th>
                                                     <th scope="col">
                                                         <select v-model="invoiceType">
@@ -400,9 +662,9 @@ input:checked + .slider:before {
                                                     <th scope="col"></th>
                                                 </tr>
                                                 <tr>
-                                                    <td><span style="cursor: pointer; padding: 7px; background-color: seagreen; color: white;" @click="saveAndClose()">Save And New</span></td>
+                                                    <td><span style="cursor: pointer; padding: 7px; background-color: #fdd325; color: white;" @click="saveAndClose()">Save And New</span></td>
                                                     <td></td>
-                                                    <td><span style="cursor: pointer; padding: 7px; background-color: seagreen; color: white;" @click="saveAndPrint()">Save And Print</span></td>
+                                                    <td><span style="cursor: pointer; padding: 7px; background-color: #fdd325; color: white;" @click="saveAndPrint()">Save And Print</span></td>
                                                     <td></td>
                                                     <td></td>
                                                 </tr>
@@ -449,7 +711,7 @@ input:checked + .slider:before {
                                             <input style="width: 30%; margin: auto;" class="form-control" type="number" name="" v-model="bill.remark">
                                         </td>
                                         <td><i @click="removeBill(index)" class="fas fa-trash" style="cursor: pointer;"></i></td>
-                                        <i style="cursor: pointer; color: cornflowerblue; font-size: 22px;" class="fas fa-plus-circle" @click="addExpense()"> Add New Bill</i>
+                                        <i style="cursor: pointer; color: #fdd325; font-size: 22px;" class="fas fa-plus-circle" @click="addExpense()"> Add New Bill</i>
                                     </tr>
                                 </tbody>
                             </table>
@@ -500,7 +762,7 @@ input:checked + .slider:before {
                                                 </template>
                                             </v-select>
                                         </div>
-                                        <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
+                                        <button style="background-color: #fdd325"><i class="fas fa-redo-alt" @click="resetSearch"></i></button>
                                         <!-- <button class="btn btn-primary"><i class="fas fa-redo-alt" @click="test"></i></button> -->
                                     </div>
 
@@ -556,7 +818,7 @@ input:checked + .slider:before {
                                                 </tr>   
                                                 <tr>
                                                     <td>
-                                                    <span style="cursor: pointer; padding: 7px; background-color: seagreen; color: white;" @click="updateStock()">Update Items</span>
+                                                    <span style="cursor: pointer; padding: 7px; background-color: #fdd325; color: white;" @click="updateStock()">Update Items</span>
                                                     </td>
                                                 </tr>  
                                             </thead>
@@ -573,19 +835,18 @@ input:checked + .slider:before {
                         <!-- Import New Products -->
                         <div class="m-b-md" style="font-size: 16px;" v-else-if="route === 'addNewProducts'">
                             
-                            <div class="container">
-                                <div class="card bg-light mt-4">
+                            <div style="width: 90%; margin:auto;">
+                                <div class="card bg-light mt-6">
                                     <div class="card-header">
                                         Hey Sexy, Hope you are having a great day!
                                     </div>
                                     <div class="card-body">
-                                        <form @submit.prevent="bulkAddNewStock()">
+                                        <form @submit.prevent="importNewProducts()">
                                             @csrf
                                             <!-- <input class="form-control" type="file" id="file" ref="file" @change="handleFileUpload()"> -->
                                             <br>
                                             <input class="form-control" type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx" @change="myFunction($event)">
-                                            </br></br>
-                                            <label id="jsonObject"> JSON : </label>
+                                            </br>
                                             <v-client-table :data="newProducts" :columns="columns" :options="options">
                                             </v-client-table>
                                             <button class="btn btn-success">Import New Products</button>

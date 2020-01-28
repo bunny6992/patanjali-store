@@ -7,17 +7,17 @@
                 bulkUpdate: false,
                 newProducts: [],
                 columns: [
-                    'Product Name',
-                    'Bar Code',
-                    'HSN/SAC',
-                    'SAP Item Code',
-                    'Tax',
-                    'Qty',
+                    'Barcode',
+                    'Style Name',
+                    'FOR',
+                    'Color',
+                    'Size',
+                    'QTY',
                     'Cost Price',
                     'MRP',
                 ],
                 options:{
-                    sortable: ['Product Name', 'Bar Code'],
+                    sortable: ['Style Name', 'FOR', 'Barcode', 'Color', 'Size', 'Cost Price', 'MRP'],
                     filterable: false,
                 },
             }
@@ -97,6 +97,18 @@
                     this.$refs.invoicer.resetData();
                 }
                 
+            },
+
+            importNewProducts() {
+                axios.post("api/bulk-add-products", this.newProducts)
+                .then(response => {
+                    console.log("DONE!!")
+                    
+                }).catch(error => {
+                    if (error.response.status === 422) {
+                        this.errors = error.response.data.errors || {};
+                    }
+                });
             }
         }
     }

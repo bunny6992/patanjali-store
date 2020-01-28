@@ -2268,13 +2268,16 @@ __webpack_require__.r(__webpack_exports__);
       unsavedInvoices: [],
       invoice_date: '',
       invoice_id: 10,
+      customerName: "",
+      phone: "",
       invoiceType: 'Sale',
-      invoice_columns: ['id', 'created_at', 'products_count', 'total', 'discount', 'grand_total', 'payment_mode', 'type', 'view', 'print'],
+      invoice_columns: ['id', 'type', 'customer_name', 'created_at', 'payment_mode', 'products_count', 'total', 'grand_total', 'view'],
       table_options: {
         sortable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
-        filterable: ['id', 'created_at', 'grand_total', 'payment_mode', 'type'],
+        filterable: false,
         headings: {
           id: 'Invoice Id',
+          name: 'Customer Name',
           created_at: 'Date',
           products_count: 'No of Items',
           type: 'Invoice Type'
@@ -2303,6 +2306,13 @@ __webpack_require__.r(__webpack_exports__);
   computed: {
     expected_closing_cash: function expected_closing_cash() {
       return this.total_sales - this.total_returns - this.totalExpenses;
+    },
+    invoiceHeight: function invoiceHeight() {
+      if (this.billItems.length > 14) {
+        return 2500;
+      }
+
+      return 1000;
     },
     totalExpenses: function totalExpenses() {
       var total = 0;
@@ -2425,8 +2435,6 @@ __webpack_require__.r(__webpack_exports__);
     onSearch: function onSearch(search, loading) {
       var _this3 = this;
 
-      //loading(true);
-      //this.search(loading, search, this);
       if (this.timer) {
         clearTimeout(this.timer);
         this.timer = null;
@@ -2475,46 +2483,39 @@ __webpack_require__.r(__webpack_exports__);
 
       if (_search.length == 0) {
         query = this.$refs.test._data._value;
-      }
+      } //let products = this.allItems;
 
-      var products = this.allItems; // let products = [];
-      // _.forEach(this.allItems, (item) => {
-      //     let tempName = item.name.toLowerCase();
-      //     tempName += item.barcode;
-      //     if (tempName.search(query.toLowerCase()) > 0) {
-      //         products.push(item);
-      //     }
-      // });
+
+      var products = [];
+
+      _.forEach(this.allItems, function (item) {
+        // let tempName = item.name.toLowerCase();
+        // tempName += item.barcode;
+        if (item.barcode.toLowerCase() == query.toLowerCase()) {
+          products.push(item);
+        }
+      });
 
       vm.options = [];
       this.selectFlag = false;
       this.itemOptions = [];
 
       if (products.length == 0) {
-        vm.options.push("I got nothing here Man!");
-        this.selectFlag = true;
-        Vue.notify({
-          group: 'foo',
-          title: 'What you  doing bro!',
-          text: 'I got nothing here!',
-          type: 'error',
-          duration: 3000,
-          speed: 1000
-        });
-        this.focusOnSearch();
-        return;
+        products = this.allItems;
       }
 
       if (products.length > 1) {
         _.forEach(products, function (value, key) {
-          vm.options.push(value.name + " MRP-" + value.mrp);
+          vm.options.push(value['for'] + " " + value.name + " " + value.color + " " + value.size + " " + " MRP-" + value.mrp);
 
           _this5.itemOptions.push({
-            id: value.name + " MRP-" + value.mrp,
+            id: value['for'] + " " + value.name + " " + value.color + " " + value.size + " " + " MRP-" + value.mrp,
             product_id: value.product_id,
             batch_id: value.batch_id,
             name: value.name,
             mrp: value.mrp,
+            size: value.size,
+            color: value.color,
             qty_avl: parseInt(value.qty),
             tax: value.tax
           });
@@ -2526,10 +2527,11 @@ __webpack_require__.r(__webpack_exports__);
         vm.options.push(products[0].name + " MRP-" + products[0].mrp);
         this.$refs.test._data._value = products[0].name + " MRP-" + products[0].mrp;
         this.newItem = {
-          id: products[0].name + " MRP-" + products[0].mrp,
+          id: products[0]['for'] + " " + products[0].name + " " + products[0].color + " " + products[0].size + " " + " MRP-" + products[0].mrp,
           name: products[0].name,
           mrp: products[0].mrp,
-          tax: products[0].tax,
+          size: products[0].size,
+          color: products[0].color,
           cost_price: 0,
           qty_avl: parseInt(products[0].qty),
           product_id: products[0].product_id,
@@ -2638,7 +2640,8 @@ __webpack_require__.r(__webpack_exports__);
               id: item.name + " MRP-" + item.mrp,
               name: item.name,
               mrp: item.mrp,
-              tax: item.tax,
+              size: item.size,
+              color: item.color,
               product_id: item.product_id,
               qty_avl: item.qty_avl,
               batch_id: item.batch_id,
@@ -2743,12 +2746,13 @@ __webpack_require__.r(__webpack_exports__);
       data.discAmt = this.discAmt;
       data.discPercent = this.discPercent;
       data.paymentMode = this.paymentMode;
-      data.rechargeAmt = this.rechargeAmt;
+      data.customer_name = this.customerName;
+      data.phone = this.phone;
       data.type = this.invoiceType;
       axios.post("api/invoice", data).then(function (response) {
         var invoice = response.data;
         _this8.invoice_id = invoice.invoice.id;
-        _this8.invoice_date = invoice.invoice.created_at;
+        _this8.invoice_date = _this8.formatDate(invoice.invoice.created_at);
         Vue.notify({
           group: 'foo',
           title: 'Yay!',
@@ -2759,7 +2763,9 @@ __webpack_require__.r(__webpack_exports__);
         });
 
         if (printBill) {
-          _this8.printBill(_this8.invoice_id);
+          setTimeout(function () {
+            _this8.printBill('printMeNew');
+          }, 250);
         }
 
         _this8.getInventory();
@@ -2769,6 +2775,8 @@ __webpack_require__.r(__webpack_exports__);
 
           _this8.invoiceType = 'Sale';
           _this8.itemOptions = [];
+          _this8.customerName = "";
+          _this8.phone = "";
           _this8.newItem = {};
           _this8.billItems = [];
           _this8.selectFlag = false;
@@ -2783,26 +2791,81 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
     },
-    getInvoices: function getInvoices() {
+    saveBill2: function saveBill2() {
       var _this9 = this;
 
-      var route = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'sale';
-      this.$parent.route = route;
+      var printBill = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
-      if (this.getInvFlag) {
-        axios.get("api/invoice").then(function (response) {
-          _this9.invoices = response.data;
-
-          _this9.calculateFigures();
-        })["catch"](function (error) {
-          if (error.response.status === 422) {
-            _this9.errors = error.response.data.errors || {};
-          }
-        });
+      if (!this.validateData()) {
+        return;
       }
+
+      var data = {};
+      data.billItems = this.billItems;
+      data.billTotal = this.billTotal;
+      data.grandTotal = this.grandTotal;
+      data.discAmt = this.discAmt;
+      data.discPercent = this.discPercent;
+      data.paymentMode = this.paymentMode;
+      data.rechargeAmt = this.rechargeAmt;
+      data.type = this.invoiceType;
+      axios.post("api/invoice", data).then(function (response) {
+        var invoice = response.data;
+        _this9.invoice_id = invoice.invoice.id;
+        _this9.invoice_date = _this9.formatDate(invoice.invoice.created_at);
+        Vue.notify({
+          group: 'foo',
+          title: 'Yay!',
+          text: 'Saved Successfully!',
+          type: 'success',
+          duration: 3000,
+          speed: 1000
+        });
+
+        if (printBill) {
+          _this9.printBill(_this9.invoice_id);
+        }
+
+        _this9.getInventory();
+
+        setTimeout(function () {
+          _this9.resetSearch();
+
+          _this9.invoiceType = 'Sale';
+          _this9.itemOptions = [];
+          _this9.customerName = "";
+          _this9.phone = "";
+          _this9.newItem = {};
+          _this9.billItems = [];
+          _this9.selectFlag = false;
+          _this9.makeRequest = true;
+          _this9.discAmt = null;
+          _this9.discPercent = null;
+          _this9.paymentMode = "Cash";
+        }, 500);
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this9.errors = error.response.data.errors || {};
+        }
+      });
     },
-    printBill: function printBill(id) {
+    getInvoices: function getInvoices(route) {
       var _this10 = this;
+
+      // this.$parent.route = route;
+      // if (this.getInvFlag) {
+      axios.get("api/invoice").then(function (response) {
+        _this10.invoices = response.data;
+
+        _this10.calculateFigures();
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this10.errors = error.response.data.errors || {};
+        }
+      }); // }
+    },
+    printBill2: function printBill2(id) {
+      var _this11 = this;
 
       axios.get("api/print-invoice/".concat(id)).then(function (response) {
         Vue.notify({
@@ -2815,9 +2878,13 @@ __webpack_require__.r(__webpack_exports__);
         });
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this10.errors = error.response.data.errors || {};
+          _this11.errors = error.response.data.errors || {};
         }
       });
+    },
+    printBill: function printBill(id) {
+      console.log($(document.getElementById("printStatement")).html());
+      this.Popup($(document.getElementById(id)).html());
     },
     Popup: function Popup(data) {
       var mywindow = window.open('', 'new div', 'height=400,width=600');
@@ -2838,23 +2905,24 @@ __webpack_require__.r(__webpack_exports__);
       // this.$htmlToPaper('printMe');
     },
     editInvoice: function editInvoice(id) {
-      var _this11 = this;
+      var _this12 = this;
 
       this.$modal.show("showInvoice");
       axios.get("api/invoice/".concat(id)).then(function (response) {
         var invoice = response.data;
-        _this11.billItems = invoice.invoice_items;
-        _this11.discPercent = invoice.discount_percent;
-        _this11.discAmt = invoice.discount;
-        _this11.grand_total = invoice.grand_total;
-        _this11.invoice_id = invoice.id;
-        _this11.invoice_date = invoice.created_at;
-        _this11.invoiceType = invoice.type;
-        _this11.paymentMode = invoice.payment_mode;
-        _this11.rechargeAmt = invoice.recharge_amount;
+        _this12.billItems = invoice.sales_items;
+        _this12.discPercent = invoice.discount_percent;
+        _this12.discAmt = invoice.discount;
+        _this12.grand_total = invoice.grand_total;
+        _this12.invoice_id = invoice.id;
+        _this12.invoice_date = _this12.formatDate(invoice.created_at);
+        _this12.invoiceType = invoice.type;
+        _this12.customerName = invoice.customer_name;
+        _this12.paymentMode = invoice.payment_mode;
+        _this12.rechargeAmt = invoice.recharge_amount;
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this11.errors = error.response.data.errors || {};
+          _this12.errors = error.response.data.errors || {};
         }
       });
     },
@@ -2862,6 +2930,8 @@ __webpack_require__.r(__webpack_exports__);
       // setTimeout(() => {
       //Object.assign(this.$data, this.$options.data());
       this.billItems = [];
+      this.customerName = "";
+      this.phone = "";
       this.applyTax = false; // },2000);
     },
     validateData: function validateData() {
@@ -2880,11 +2950,11 @@ __webpack_require__.r(__webpack_exports__);
       return true;
     },
     updateStock: function updateStock() {
-      var _this12 = this;
+      var _this13 = this;
 
       if (this.applyTax) {
         _.forEach(this.billItems, function (item, key) {
-          item.cost_price = _this12.getTaxedPrice(item);
+          item.cost_price = _this13.getTaxedPrice(item);
         });
       }
 
@@ -2898,10 +2968,10 @@ __webpack_require__.r(__webpack_exports__);
           speed: 1000
         });
 
-        _this12.resetData();
+        _this13.resetData();
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this12.errors = error.response.data.errors || {};
+          _this13.errors = error.response.data.errors || {};
         }
       });
     },
@@ -2916,7 +2986,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     saveExpense: function saveExpense() {
-      var _this13 = this;
+      var _this14 = this;
 
       var data = {
         expenses: this.expenses,
@@ -2942,16 +3012,16 @@ __webpack_require__.r(__webpack_exports__);
           duration: 2000,
           speed: 1000
         });
-        _this13.closingDays[_this13.closingDate] = response.data[_this13.closingDate];
-        _this13.closingDayExists = true;
+        _this14.closingDays[_this14.closingDate] = response.data[_this14.closingDate];
+        _this14.closingDayExists = true;
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this13.errors = error.response.data.errors || {};
+          _this14.errors = error.response.data.errors || {};
         }
       });
     },
     saveSalesReturn: function saveSalesReturn() {
-      var _this14 = this;
+      var _this15 = this;
 
       var data = {
         expected_closing_cash: this.expected_closing_cash,
@@ -2971,12 +3041,12 @@ __webpack_require__.r(__webpack_exports__);
         //}
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this14.errors = error.response.data.errors || {};
+          _this15.errors = error.response.data.errors || {};
         }
       });
     },
     printExpense: function printExpense() {
-      var _this15 = this;
+      var _this16 = this;
 
       if (!this.closingDayExists) {
         return;
@@ -2994,7 +3064,7 @@ __webpack_require__.r(__webpack_exports__);
         });
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this15.errors = error.response.data.errors || {};
+          _this16.errors = error.response.data.errors || {};
         }
       });
     },
@@ -3019,16 +3089,16 @@ __webpack_require__.r(__webpack_exports__);
       this.total_returns = total_returns;
     },
     getExpenses: function getExpenses() {
-      var _this16 = this;
+      var _this17 = this;
 
       axios.get("api/expense").then(function (response) {
-        _this16.closingDays = response.data;
+        _this17.closingDays = response.data;
         setTimeout(function () {
-          _this16.fetchExpenses();
+          _this17.fetchExpenses();
         }, 1000);
       })["catch"](function (error) {
         if (error.response.status === 422) {
-          _this16.errors = error.response.data.errors || {};
+          _this17.errors = error.response.data.errors || {};
         }
       });
     },
@@ -3057,6 +3127,19 @@ __webpack_require__.r(__webpack_exports__);
       this.closing_cash = 0;
       this.calculateFigures();
       this.fetchExpenses();
+    },
+    formatDate: function formatDate(date) {
+      var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      var newDate = new Date(date);
+      return newDate.getDate() + "-" + months[newDate.getMonth()] + "-" + newDate.getFullYear();
+    },
+    printExpenses: function printExpenses() {
+      var _this18 = this;
+
+      this.getExpenses();
+      setTimeout(function () {
+        _this18.printBill("printStatement");
+      }, 1000);
     }
   }
 });
@@ -3077,7 +3160,13 @@ __webpack_require__.r(__webpack_exports__);
     return {
       route: 'sale',
       file: '',
-      bulkUpdate: false
+      bulkUpdate: false,
+      newProducts: [],
+      columns: ['Barcode', 'Style Name', 'FOR', 'Color', 'Size', 'QTY', 'Cost Price', 'MRP'],
+      options: {
+        sortable: ['Style Name', 'FOR', 'Barcode', 'Color', 'Size', 'Cost Price', 'MRP'],
+        filterable: false
+      }
     };
   },
   mounted: function mounted() {
@@ -3101,23 +3190,46 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
     },
+    myFunction: function myFunction(evt) {
+      var _this2 = this;
+
+      var selectedFile = evt.target.files[0];
+      var reader = new FileReader();
+
+      reader.onload = function (event) {
+        var data = event.target.result;
+        var workbook = XLSX.read(data, {
+          type: 'binary'
+        });
+        workbook.SheetNames.forEach(function (sheetName) {
+          var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+          var json_object = JSON.stringify(XL_row_object);
+          _this2.newProducts = JSON.parse(json_object);
+        });
+      };
+
+      reader.onerror = function (event) {
+        console.error("File could not be read! Code " + event.target.error.code);
+      };
+
+      reader.readAsBinaryString(selectedFile);
+    },
     handleFileUpload: function handleFileUpload() {
       this.file = this.$refs.file.files[0];
     },
-    getInvoices: function getInvoices() {
-      var getExpenses = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      if (getExpenses) {
-        this.$parent.route = "expenses";
+    getInvoices: function getInvoices(getExpenses) {
+      if (getExpenses == 'true') {
+        this.route = "expenses";
       } else {
-        this.$parent.route = "invoices";
+        this.route = "invoices";
       }
 
-      if (this.$refs.invoicer && this.$parent.route == "expenses") {
-        var route = this.$parent.route;
+      if (this.$refs.invoicer && this.route == "expenses") {
         this.$refs.invoicer.resetData();
-        this.$refs.invoicer.getInvoices(route);
+        this.$refs.invoicer.getInvoices(this.route);
         this.$refs.invoicer.getExpenses();
+      } else if (this.$refs.invoicer && this.route == "invoices") {
+        this.$refs.invoicer.getInvoices(this.route);
       }
     },
     getInvoicer: function getInvoicer() {
@@ -3126,6 +3238,17 @@ __webpack_require__.r(__webpack_exports__);
       if (this.$refs.invoicer) {
         this.$refs.invoicer.resetData();
       }
+    },
+    importNewProducts: function importNewProducts() {
+      var _this3 = this;
+
+      axios.post("api/bulk-add-products", this.newProducts).then(function (response) {
+        console.log("DONE!!");
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this3.errors = error.response.data.errors || {};
+        }
+      });
     }
   }
 });

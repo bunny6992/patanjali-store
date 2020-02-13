@@ -6,6 +6,7 @@
                 file: '',
                 bulkUpdate: false,
                 newProducts: [],
+                allItems: [],
                 columns: [
                     'Barcode',
                     'Style Name',
@@ -20,11 +21,36 @@
                     sortable: ['Style Name', 'FOR', 'Barcode', 'Color', 'Size', 'Cost Price', 'MRP'],
                     filterable: false,
                 },
+                item_columns: [
+                    'product_id',
+                    'for',
+                    'name',
+                    'barcode',
+                    'color',
+                    'size',
+                    'qty',
+                    'mrp'
+                ],
+                table_options:{
+                    sortable: true,
+                    filterable: true,
+                    headings: {
+                        name: 'Style Name',
+                        qty: 'Quantity In Stock'
+                    },
+                },
             }
         },
         
         mounted() {
-            console.log('Component mounted.')
+            // axios.get(`api/get-all-items`)
+            // .then(response => {
+            //     this.allItems = response.data;                
+            // }).catch(error => {
+            //     if (error.response.status === 422) {
+            //       this.errors = error.response.data.errors || {};
+            //     }
+            // });
         },
 
         methods: {

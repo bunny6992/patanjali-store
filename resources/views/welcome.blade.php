@@ -719,6 +719,12 @@ input:checked + .slider:before {
                         
                         <div class="m-b-md" style="font-size: 65px;" v-else-if="route === 'stockList'">
                             Stock List
+                            <div style="margin: 0% 4%;">  
+                                 <v-client-table :data="allItems" :columns="item_columns" :options="table_options">
+                                    <!-- <a slot="view" slot-scope="props" class="fa fa-expand-arrows-alt" @click="editInvoice(props.row.id)" style="cursor: pointer;"></a>
+                                    <a slot="print" slot-scope="props" class="fa fa-print" @click="printBill(props.row.id)" style="cursor: pointer;"></a> -->
+                                </v-client-table>
+                            </div>
                         </div>
                         <div class="m-b-md" style="font-size: 16px;" v-else-if="route === 'updateStock'">
                             <div style="text-align: left; margin: 30px;">

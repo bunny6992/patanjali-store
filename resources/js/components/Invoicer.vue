@@ -189,7 +189,8 @@
             getInventory() {
                 axios.get(`api/get-all-items`)
                 .then(response => {
-                    this.allItems = response.data;                
+                    this.allItems = response.data;
+                    this.$parent.allItems = this.allItems;       
                 }).catch(error => {
                     if (error.response.status === 422) {
                       this.errors = error.response.data.errors || {};
@@ -424,7 +425,9 @@
             },
 
             focusOnSearch() {
-                document.getElementsByClassName("vs__search")[0].focus();
+                if (this.$parent.route == 'sale') {
+                    document.getElementsByClassName("vs__search")[0].focus();
+                }
             },
 
             myFunction() {

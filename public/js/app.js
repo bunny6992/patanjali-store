@@ -2415,6 +2415,7 @@ __webpack_require__.r(__webpack_exports__);
 
       axios.get("api/get-all-items").then(function (response) {
         _this2.allItems = response.data;
+        _this2.$parent.allItems = _this2.allItems;
       })["catch"](function (error) {
         if (error.response.status === 422) {
           _this2.errors = error.response.data.errors || {};
@@ -2665,7 +2666,9 @@ __webpack_require__.r(__webpack_exports__);
       this.focusOnSearch();
     },
     focusOnSearch: function focusOnSearch() {
-      document.getElementsByClassName("vs__search")[0].focus();
+      if (this.$parent.route == 'sale') {
+        document.getElementsByClassName("vs__search")[0].focus();
+      }
     },
     myFunction: function myFunction() {
       this.makeRequest = true;
@@ -3162,15 +3165,31 @@ __webpack_require__.r(__webpack_exports__);
       file: '',
       bulkUpdate: false,
       newProducts: [],
+      allItems: [],
       columns: ['Barcode', 'Style Name', 'FOR', 'Color', 'Size', 'QTY', 'Cost Price', 'MRP'],
       options: {
         sortable: ['Style Name', 'FOR', 'Barcode', 'Color', 'Size', 'Cost Price', 'MRP'],
         filterable: false
+      },
+      item_columns: ['product_id', 'for', 'name', 'barcode', 'color', 'size', 'qty', 'mrp'],
+      table_options: {
+        sortable: true,
+        filterable: true,
+        headings: {
+          name: 'Style Name',
+          qty: 'Quantity In Stock'
+        }
       }
     };
   },
-  mounted: function mounted() {
-    console.log('Component mounted.');
+  mounted: function mounted() {// axios.get(`api/get-all-items`)
+    // .then(response => {
+    //     this.allItems = response.data;                
+    // }).catch(error => {
+    //     if (error.response.status === 422) {
+    //       this.errors = error.response.data.errors || {};
+    //     }
+    // });
   },
   methods: {
     submit: function submit(apiLink) {
@@ -73911,8 +73930,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\projects\patanjali-store\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! D:\projects\patanjali-store\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! E:\projects\patanjali-store\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! E:\projects\patanjali-store\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

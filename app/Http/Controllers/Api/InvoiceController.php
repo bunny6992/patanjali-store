@@ -94,11 +94,11 @@ class InvoiceController extends Controller
 
         if (!empty($requestData['customer_name']) && !empty($requestData['phone'])) {
             $customer = Customer::where('phone', $requestData['phone'])->first();
-            
-            if (count($customer) == 0) {
+            // dd(count($customer));
+            if ($customer == null) {
                 $customer = new Customer;
             }
-            $customer->name = $requestData['customer_name'];
+            $customer->name = strtolower($requestData['customer_name']);
             $customer->phone = $requestData['phone'];
             $customer->save();
             $invoice->customer_id = $customer->id;
